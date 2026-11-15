@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Blocks commits to this repo that carry secrets, env files, IP addresses or names from the local denylist.
+set -euo pipefail
+
+deny_file="${DEVKIT_DENYLIST:-$HOME/.config/devkit/denylist.txt}"
+secret_re='(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,})'
+ip_re='(^|[^0-9.])((25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])([^0-9.]|$)'
+ip_ok='(127\.0\.0\.1|0\.0\.0\.0|255\.255\.255\.[0-9]+|192\.0\.2\.[0-9]+)'
+problems=""
+
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -n "$files" ] || exit 0
+
+bad_names=$(grep -E '(^|/)\.env($|\.)' <<<"$files" | grep -v '\.env\.example$' || true)
+[ -z "$bad_names" ] || problems+=$'\n'"env files staged:"$'\n'"$(sed 's/^/  /' <<<"$bad_names")"
+
+added=$(git diff --cached -U0 --no-color --diff-filter=ACMR | grep -E '^\+\+\+ |^\+' || true)
+scan() {
+  local label="$1"; shift
+  local hits
+  hits=$(awk '/^\+\+\+ /{f=substr($0,7); next} {print f": "substr($0,2)}' <<<"$added" | grep "$@" || true)
+  [ -z "$hits" ] || problems+=$'\n'"$label:"$'\n'"$(head -20 <<<"$hits" | sed 's/^/  /')"
+}
+scan "possible secret" -E -e "$secret_re"
+ips=$(awk '/^\+\+\+ /{f=substr($0,7); next} {print f": "substr($0,2)}' <<<"$added" | grep -E "$ip_re" | grep -vE "$ip_ok" || true)
+[ -z "$ips" ] || problems+=$'\n'"IP address:"$'\n'"$(head -20 <<<"$ips" | sed 's/^/  /')"
+if [ -f "$deny_file" ]; then
+  patterns_file=$(mktemp)
+  trap 'rm -f "$patterns_file"' EXIT
+  grep -vE '^[[:space:]]*(#|$)' "$deny_file" > "$patterns_file" || true
+  [ ! -s "$patterns_file" ] || scan "name from denylist" -iE -f "$patterns_file"
+else
+  echo "pre-commit: no denylist at $deny_file (see denylist.example.txt); internal names are not checked." >&2
+fi
+
+if [ -n "$problems" ]; then
+  echo "commit blocked: this repo must stay free of secrets and internal names.${problems}" >&2
+  echo "To commit anyway on purpose: git commit --no-verify" >&2
+  exit 1
+fi

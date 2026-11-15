@@ -1,0 +1,5 @@
+# One case-insensitive regex per line. Names that must never be committed to this repo:
+# company names, internal repo and service names, vendor names, hostnames.
+# The real list lives outside the repo: ~/.config/devkit/denylist.txt
+acme-internal
+payments-core

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Installed by devkit git-local/install.sh. Blocks pushes that carry AI tooling files or AI attribution.
+set -euo pipefail
+
+file_re='(^|/)(CLAUDE(\.local)?\.md|AGENTS\.md|GEMINI\.md|\.claude/|\.cursor/|\.cursorrules$|\.windsurfrules$|\.aider[^/]*|\.codex/|\.mcp\.json$|\.ai-workflow/|\.github/copilot-instructions\.md$)'
+msg_re='co-authored-by:.*(claude|anthropic|copilot|cursor|openai|chatgpt|gemini)|generated with \[?claude|🤖 generated'
+zero=0000000000000000000000000000000000000000
+remote="$1"
+problems=""
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ "$remote_sha" = "$zero" ]; then
+    range=("$local_sha" --not --remotes="$remote")
+  else
+    range=("$remote_sha..$local_sha")
+  fi
+
+  files=$(git log --format= --name-only --diff-filter=ACMR "${range[@]}" | grep -v 'node_modules/' | grep -E "$file_re" | sort -u || true)
+  if [ -n "$files" ]; then
+    problems+=$'\n'"AI files changed in commits for ${remote_ref}:"$'\n'"$(sed 's/^/  /' <<<"$files")"
+  fi
+
+  commits=$(git log --format='%h %s' -i -E --grep="$msg_re" "${range[@]}" || true)
+  if [ -n "$commits" ]; then
+    problems+=$'\n'"AI attribution in commit messages for ${remote_ref}:"$'\n'"$(sed 's/^/  /' <<<"$commits")"
+  fi
+done
+
+if [ -n "$problems" ]; then
+  echo "push blocked: AI tooling must stay local.${problems}" >&2
+  echo "Remove the files from those commits (git rm --cached, then amend or rebase) or reword the messages." >&2
+  echo "To push anyway on purpose: git push --no-verify" >&2
+  exit 1
+fi

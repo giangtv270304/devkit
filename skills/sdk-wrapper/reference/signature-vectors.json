@@ -1,0 +1,35 @@
+[
+  {
+    "name": "get without query or body",
+    "apiKey": "test-api-key",
+    "secretKey": "test-secret-key",
+    "method": "GET",
+    "path": "/v1/widgets/wid_1",
+    "query": "",
+    "body": "",
+    "timestamp": 1700000000,
+    "signature": "TQ5ca1LnZDlJ5WNvP_c1dm1GWqKbLea2jHSLqDaCgMs"
+  },
+  {
+    "name": "get with sorted query",
+    "apiKey": "test-api-key",
+    "secretKey": "test-secret-key",
+    "method": "GET",
+    "path": "/v1/widgets",
+    "query": "page=2&pageSize=10&status=active",
+    "body": "",
+    "timestamp": 1700000000,
+    "signature": "AE9oLyAKg-A61rE32mAelD3sGpCo8BGOxXLY5vS93ug"
+  },
+  {
+    "name": "post with json body",
+    "apiKey": "test-api-key",
+    "secretKey": "test-secret-key",
+    "method": "POST",
+    "path": "/v1/widgets",
+    "query": "",
+    "body": "{\"name\":\"Bolt\",\"price\":\"12.50\"}",
+    "timestamp": 1700000001,
+    "signature": "KqRhIynu1Tr_dC08neZ5f4pfvUO3zWdDwXoRMmMZJ4Y"
+  }
+]

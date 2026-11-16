@@ -47,6 +47,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/brainstorm` | from a vague idea to a decision record |
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/go-service` | Go service conventions with a reference service |
+| `skills/sdk-wrapper` | conventions for an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
 | `rules/` | comments, commits, pull requests, review levels, writing style, preferences |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |

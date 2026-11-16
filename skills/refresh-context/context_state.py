@@ -33,6 +33,19 @@ def repos():
     return project.repos(ROOT, CFG)
 
 
+def based_on_docs():
+    """Markdown files whose `based_on:` frontmatter is checked: the notes dir, or the files and dirs in `Based-on docs`."""
+    targets = [t.strip() for t in CFG.get("based-on docs", "").split(",") if t.strip()] or [CFG["notes dir"]]
+    found = []
+    for t in targets:
+        p = ROOT / t
+        if p.is_file():
+            found.append(p)
+        elif p.is_dir():
+            found.extend(sorted(p.rglob("*.md")))
+    return found
+
+
 def load():
     return json.loads(STATE.read_text()) if STATE.exists() else {}
 
@@ -67,9 +80,7 @@ def check():
             branch = git(repo, "rev-parse", "--abbrev-ref", "HEAD")
             moved = f" (now on {branch}, surveyed on {entry['branch']})" if branch != entry["branch"] else ""
             lines.append(f"- {repo}: {c['commits']} commits since {entry['refreshed_at'][:10]}{moved}; changed {c['areas']}")
-    for note in sorted(NOTES.glob("*.md")) if NOTES.exists() else []:
-        if note.name == "README.md":
-            continue
+    for note in based_on_docs():
         m = re.search(r"^based_on:\s*(.+)$", note.read_text(), re.M)
         if not m:
             continue
@@ -79,7 +90,7 @@ def check():
             if (project.repo_path(repo, ROOT) / ".git").exists() and changes(repo, sha):
                 stale.append(repo)
         if stale:
-            lines.append(f"- {CFG['notes dir']}/{note.name}: code changed in {', '.join(stale)} since the note was written; verify before trusting it")
+            lines.append(f"- {note.relative_to(ROOT)}: code changed in {', '.join(stale)} since it was written; verify before trusting it")
     if lines:
         print("Project context drift (CLAUDE.md / docs written before these changes). Re-read only the changed areas, "
               "and offer to run refresh-context for these repos:")

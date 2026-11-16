@@ -14,7 +14,7 @@ Với mỗi repo trong phạm vi:
 3. Cập nhật tài liệu kiến trúc (sơ đồ, luồng, port, chỗ còn thiếu) và tài liệu hợp đồng nếu quan hệ phụ thuộc thay đổi.
 4. Dự án nhiều repo: giữ CLAUDE.md ở thư mục gốc dưới khoảng 80 dòng. File đó là tấm bản đồ, không phải sách hướng dẫn.
 5. Ghi lại lần rà soát: `python3 ${CLAUDE_SKILL_DIR}/context_state.py record <repo> [<repo> ...]`, chạy từ thư mục gốc dự án (dự án một repo: `record .`). Nhờ vậy, lần kiểm tra lệch tài liệu tiếp theo bắt đầu từ HEAD mới. Lần `record` đầu tiên tạo file trạng thái và bật việc kiểm tra cho dự án đó.
-6. Nếu một note về repo này bị đánh dấu cũ, kiểm tra nó với code. Cập nhật nội dung, `based_on` và `updated`.
+6. Nếu một note hoặc một trang tài liệu có `based_on` (trang luồng, hợp đồng) về repo này bị đánh dấu cũ, kiểm tra nó với code. Cập nhật nội dung, `based_on` và `updated`. Hook kiểm tra thư mục note, hoặc các file và thư mục ghi ở dòng `Based-on docs:` trong `.claude/project.md`.
 7. Báo lại những gì đã đổi và những gì bạn không kiểm tra được.
 
 Dạng của một note (trong thư mục note của dự án):

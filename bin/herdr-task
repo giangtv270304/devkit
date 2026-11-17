@@ -1,0 +1,31 @@
+#!/bin/sh
+# herdr-task <slug> [first message] [--root DIR]: open a Herdr space for a task, with a lead claude at DIR.
+# DIR defaults to the current folder; the first message defaults to "/work <slug>".
+set -eu
+
+root=$(pwd)
+slug=
+msg=
+while [ $# -gt 0 ]; do
+  case $1 in
+    --root) [ $# -ge 2 ] || { echo "herdr-task: --root needs a folder" >&2; exit 2; }; root=$2; shift 2 ;;
+    *) if [ -z "$slug" ]; then slug=$1; else msg=${msg:+$msg }$1; fi; shift ;;
+  esac
+done
+
+[ -n "$slug" ] || { echo "usage: herdr-task <slug> [first message] [--root DIR]" >&2; exit 2; }
+case $slug in
+  *[!a-z0-9-]* | -*) echo "herdr-task: slug must be lowercase letters, digits and dashes" >&2; exit 2 ;;
+esac
+[ -d "$root" ] || { echo "herdr-task: no such folder: $root" >&2; exit 2; }
+root=$(cd "$root" && pwd)
+msg=${msg:-/work $slug}
+
+command -v herdr-app >/dev/null 2>&1 || { echo "herdr-task: herdr-app not found; open the Herdr app once" >&2; exit 1; }
+
+req=$(SLUG="$slug" ROOT="$root" MSG="$msg" /usr/bin/python3 -I -c '
+import json, os
+print(json.dumps({"name": os.environ["SLUG"], "folder": os.environ["ROOT"], "tab": "lead",
+                  "argv": ["claude", os.environ["MSG"]]}, ensure_ascii=False))')
+
+herdr-app do space.new "$req"

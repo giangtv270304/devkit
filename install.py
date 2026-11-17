@@ -16,6 +16,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent
 CLAUDE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
 SETTINGS = CLAUDE / "settings.json"
+HERDR_TEMPLATES = Path.home() / ".config" / "herdr-core" / "templates"
+BIN = Path.home() / ".local" / "bin"
 FRAGMENT = REPO / "settings" / "user.fragment.json"
 MARK = "/.claude/devkit/"
 APPLY = "--apply" in sys.argv
@@ -36,6 +38,11 @@ def items():
     for kind, folder in (("agent", "agents"), ("rule", "rules"), ("style", "output-styles")):
         for f in sorted((REPO / folder).glob("*.md")):
             yield kind, CLAUDE / folder / f.name, f
+    for f in sorted((REPO / "herdr" / "templates").glob("*.md")):
+        yield "template", HERDR_TEMPLATES / f.name, f
+    for f in sorted((REPO / "bin").iterdir()):
+        if f.is_file() and os.access(f, os.X_OK):
+            yield "bin", BIN / f.name, f
 
 
 def ours(dst, src):
@@ -122,6 +129,7 @@ def merge_settings():
 def main():
     print(f"repo:   {REPO}")
     print(f"target: {CLAUDE}")
+    print(f"        {HERDR_TEMPLATES}, {BIN}")
     mode = "APPLY" if APPLY else "DRY RUN (nothing is written)"
     print(f"mode:   {mode}{' / UNINSTALL' if UNINSTALL else ''}\n")
     for kind, dst, src in items():

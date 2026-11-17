@@ -48,6 +48,9 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/go-service` | Go service conventions with a reference service |
 | `skills/sdk-wrapper` | conventions for an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
+| `skills/herdr-dispatch` | give each step of a multi-repo plan to its own agent in a Herdr tab or pane |
+| `herdr/templates` | `worker.md` and `reviewer.md`: rules `herdr-dispatch` copies into an agent's first message; linked to `~/.config/herdr-core/templates/` |
+| `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
 | `rules/` | comments, commits, pull requests, review levels, writing style, preferences |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
@@ -55,6 +58,10 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `git-local/` | hide AI files from git and block pushing them, in any repo |
 | `bin/` | command-line tools (reserved) |
+
+## Herdr
+
+Set `worktrees.directory` in `~/.config/herdr-app/settings.json` so agents work in worktrees outside the repo. Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
 
 ## Rules for this repo
 

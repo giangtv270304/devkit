@@ -1,6 +1,6 @@
 ---
 name: lead
-description: Phiên điều phối nhiều yêu cầu liên tiếp của một project trong Herdr app (lead). Người dùng chỉ cần prompt bằng lời thường; lead tự chọn trả lời, tự làm, hoặc giao việc qua herdr-dispatch (vòng đời một task thì do /work lo). Người dùng gõ /lead, có thể kèm tên project hoặc thư mục.
+description: Phiên điều phối nhiều yêu cầu liên tiếp của một project trong Herdr app (lead). Người dùng chỉ cần prompt bằng lời thường; lead tự chọn trả lời, tự làm, hoặc giao việc qua herdr-dispatch (vòng đời một task thì do /work lo). Dùng khi người dùng gõ /lead, có thể kèm tên project hoặc thư mục.
 argument-hint: "[project hoặc thư mục]"
 disable-model-invocation: true
 ---

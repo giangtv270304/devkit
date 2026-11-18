@@ -29,9 +29,6 @@ def git(repo, *args):
     return out.stdout.strip()
 
 
-MAX_PANES = 3
-
-
 def find_lead(terminal):
     for space in herdr("ls").get("spaces", []):
         for tab in space.get("tabs", []):
@@ -44,10 +41,13 @@ def find_lead(terminal):
 
 
 def auto_place(lead_pane, others):
+    # Herdr halves the pane it splits, so this order ends with four equal columns.
     if not others:
         return "right", lead_pane
-    if len(others) < MAX_PANES:
-        return "down", others[-1]
+    if len(others) == 1:
+        return "right", others[0]
+    if len(others) == 2:
+        return "right", lead_pane
     return "tab", None
 
 
@@ -85,7 +85,7 @@ def main():
     p.add_argument("name")
     p.add_argument("task")
     p.add_argument("--place", choices=["auto", "tab", "right", "down"], default="auto",
-                   help="auto: first agent right of the lead, next two below it, then tabs")
+                   help="auto: up to three agents as columns beside the lead, then tabs")
     p.add_argument("--template", default="worker")
     p.add_argument("--worktree", metavar="BRANCH")
     p.add_argument("--base", default="HEAD", help="where a new worktree branch starts (default: HEAD of repo_dir)")

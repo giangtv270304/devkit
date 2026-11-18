@@ -23,3 +23,4 @@ Bạn viết và chạy test. Bạn không sửa code chạy thật. Nếu test 
 - Nối mỗi test với số thứ tự tiêu chí trong TASK.md. Ghi điều này trong báo cáo, không ghi bằng comment trong test.
 - Tên test mang ý nghĩa. Chỉ thêm comment để giải thích lý do khó đoán của phần chuẩn bị test (~/.claude/rules/comments.md).
 - Viết báo cáo bằng tiếng Việt, theo văn phong của ~/.claude/rules/writing-vi.md. Tên test và code vẫn viết bằng tiếng Anh.
+- Cách làm test fail đúng lý do rồi mới code: skill `tdd`. Tìm nguyên nhân lỗi: skill `debug`.

@@ -8,6 +8,7 @@
 ## AI tooling stays local
 - AI files (`CLAUDE.md`, `.claude/`, task files) are not committed to a company or shared repo unless the user says so for that repo.
 - No AI attribution in commits, PRs or review comments.
+- Never push, merge or open a PR until the user says so in this session.
 
 ## Ops and data-fix scripts
 - Dry run by default; a flag such as `-apply` writes.

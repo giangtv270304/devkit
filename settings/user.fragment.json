@@ -32,11 +32,19 @@
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [{"type": "command", "command": "\"$HOME/.claude/devkit/hooks/format-edited-file.sh\"", "timeout": 30}]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{"type": "command", "command": "\"$HOME/.claude/devkit/hooks/comment-guard.sh\"", "timeout": 10}]
       }
     ],
     "SessionStart": [
       {
         "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/skills/refresh-context/context_state.py\" check", "timeout": 20}]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/task_resume.py\"", "timeout": 10}]
       }
     ],
     "Stop": [

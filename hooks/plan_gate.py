@@ -57,5 +57,5 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"plan_gate: {e!r}", file=sys.stderr)

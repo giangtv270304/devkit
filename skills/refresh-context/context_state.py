@@ -17,11 +17,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "work"))
 import project  # noqa: E402
 
-ROOT = project.root()
-CFG = project.config(ROOT)
-STATE = ROOT / CFG["context state"]
-NOTES = ROOT / CFG["notes dir"]
 MAX_LINES = 30
+ROOT = CFG = STATE = NOTES = None
+
+
+def init():
+    global ROOT, CFG, STATE, NOTES
+    ROOT = project.root()
+    CFG = project.config(ROOT)
+    STATE = ROOT / CFG["context state"]
+    NOTES = ROOT / CFG["notes dir"]
 
 
 def git(repo, *args):
@@ -113,12 +118,18 @@ def record(targets):
     STATE.write_text(json.dumps(dict(sorted(state.items())), indent=2) + "\n")
 
 
-if __name__ == "__main__":
+def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "check"
-    if cmd == "record":
-        record(sys.argv[2:])
-    else:
-        try:
+    try:
+        init()
+        if cmd == "record":
+            record(sys.argv[2:])
+        else:
             check()
-        except Exception as e:
-            print(f"(context drift check skipped: {e})")
+    except Exception as e:
+        print(f"context_state: skipped: {e}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

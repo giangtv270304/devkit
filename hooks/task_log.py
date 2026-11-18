@@ -37,5 +37,5 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"task_log: {e!r}", file=sys.stderr)

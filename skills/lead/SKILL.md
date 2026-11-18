@@ -31,7 +31,7 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 4. Giao việc:
    - Việc rõ và làm lại được: viết `<Task dir>/<slug>/TASK.md` ngắn (mục tiêu, thế nào là xong, phạm vi, các bước), rồi giao ngay bằng skill `herdr-dispatch`.
    - Việc đụng hợp đồng giữa các service, tiền, xác thực, dữ liệu cá nhân, nhiều repo, hoặc có nhiều cách làm: chạy `/work <slug>` tới ĐIỂM DỪNG 1, để người dùng duyệt kế hoạch, rồi mới giao.
-   - Lần đầu giao việc thì bỏ dấu `--place`, để mỗi agent một tab. Người dùng nói "mở cạnh nhau" thì dùng `--place right`.
+   - Để `dispatch.py` tự chọn chỗ (`--place auto`, mặc định): tối đa 3 agent thì mở thành pane cạnh lead, vì người dùng muốn thấy lead và agent con cùng lúc; từ agent thứ 4 thì mở tab. Người dùng nói "mở tab" thì dùng `--place tab`.
 5. Ghi vào `LEAD.md` ngay trong lượt: việc đã xong, việc đã giao (slug, terminal, branch), hoặc việc chờ người dùng (câu hỏi).
 
 ## Tự quyết hay hỏi

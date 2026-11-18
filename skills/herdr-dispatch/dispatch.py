@@ -29,13 +29,26 @@ def git(repo, *args):
     return out.stdout.strip()
 
 
+MAX_PANES = 3
+
+
 def find_lead(terminal):
     for space in herdr("ls").get("spaces", []):
         for tab in space.get("tabs", []):
-            for t in tab.get("terminals", []):
+            terminals = tab.get("terminals", [])
+            for t in terminals:
                 if t.get("terminal") == terminal:
-                    return space["id"], t.get("pane")
-    return None, None
+                    others = [o.get("pane") for o in terminals if o.get("terminal") != terminal and o.get("pane")]
+                    return space["id"], t.get("pane"), others
+    return None, None, []
+
+
+def auto_place(lead_pane, others):
+    if not others:
+        return "right", lead_pane
+    if len(others) < MAX_PANES:
+        return "down", others[-1]
+    return "tab", None
 
 
 def worktrees_root():
@@ -71,7 +84,8 @@ def main():
     p.add_argument("repo_dir")
     p.add_argument("name")
     p.add_argument("task")
-    p.add_argument("--place", choices=["tab", "right", "down"], default="tab")
+    p.add_argument("--place", choices=["auto", "tab", "right", "down"], default="auto",
+                   help="auto: first agent right of the lead, next two below it, then tabs")
     p.add_argument("--template", default="worker")
     p.add_argument("--worktree", metavar="BRANCH")
     p.add_argument("--base", default="HEAD", help="where a new worktree branch starts (default: HEAD of repo_dir)")
@@ -87,9 +101,12 @@ def main():
     template = os.path.expanduser(f"~/.config/herdr-core/templates/{a.template}.md")
     if not os.path.isfile(template):
         sys.exit(f"no template: {template}")
-    space, lead_pane = find_lead(lead)
+    space, lead_pane, other_panes = find_lead(lead)
     if not space:
         sys.exit(f"could not find the space of terminal {lead}")
+    place, split_pane = a.place, lead_pane
+    if place == "auto":
+        place, split_pane = auto_place(lead_pane, other_panes)
 
     with open(template, encoding="utf-8") as f:
         body = f.read()
@@ -111,7 +128,7 @@ def main():
         where = f"Bạn làm trong repo {folder}. Thư mục {readable} chứa các repo khác: chỉ đọc."
     task = f"{rules} {where} Terminal điều phối: {lead}. Việc của bạn: {a.task}"
 
-    if a.place == "tab":
+    if place == "tab":
         req = {
             "name": a.name,
             "space": space,
@@ -122,15 +139,15 @@ def main():
         }
         res = herdr("do", "tab.new", json.dumps(req, ensure_ascii=False))
     else:
-        if not lead_pane:
+        if not split_pane:
             sys.exit(f"could not find the pane of terminal {lead}")
         req = {
-            "direction": a.place,
-            "pane": lead_pane,
+            "direction": place,
+            "pane": split_pane,
             "argv": ["sh", "-c", 'cd "$1" && exec claude --add-dir "$2" -- "$3"', "sh", folder, readable, task],
         }
         res = herdr("do", "pane.split", json.dumps(req, ensure_ascii=False))
-    print(json.dumps({"place": a.place, "terminal": res.get("terminal"), "pane": res.get("pane"),
+    print(json.dumps({"place": place, "terminal": res.get("terminal"), "pane": res.get("pane"),
                       "tab": res.get("tab"), "folder": folder, "worktree": bool(a.worktree),
                       "new_worktree": created, "name": a.name}, ensure_ascii=False))
 

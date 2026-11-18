@@ -27,12 +27,12 @@ Kế hoạch mà hai bước song song cùng sửa một file thì đừng chia 
 1. Đọc mục Kế hoạch của TASK.md. Lập danh sách: bước, repo, bước nào phụ thuộc bước nào. Nhiều repo thì repo cung cấp đi trước, repo sử dụng đi sau (xem skill `cross-repo-change`).
 2. Giao các bước không phụ thuộc bước nào trước. Không chạy quá 3 agent ghi code cùng lúc, vì người dùng phải review kịp. Với mỗi bước, chạy:
    ```sh
-   python3 ~/.claude/skills/herdr-dispatch/dispatch.py <đường dẫn repo> "<tên>" "<câu giao việc>" [--worktree <branch>] [--place right|down]
+   python3 ~/.claude/skills/herdr-dispatch/dispatch.py <đường dẫn repo> "<tên>" "<câu giao việc>" [--worktree <branch>] [--place auto|tab|right|down]
    ```
    - Tên: ngắn, ví dụ `user-svc`, hoặc `step-2` khi dùng worktree.
    - `--worktree <branch>`: script tạo worktree cho branch đó (hoặc dùng lại worktree đã có), bắt đầu từ HEAD của repo, đổi bằng `--base <ref>`. Đặt tên branch theo task, ví dụ `<slug>/step-2`. Thư mục worktree lấy từ `worktrees.directory` trong `~/.config/herdr-app/settings.json`, mặc định `~/.herdr/worktrees`.
    - Không có `--worktree`, agent được đọc thư mục cha của repo (các repo khác). Có `--worktree`, agent chỉ được đọc repo chính.
-   - Mặc định mỗi agent một tab mới. `--place right` hoặc `--place down` mở agent thành pane cạnh bạn. Dùng pane khi có 2–3 agent và người dùng muốn thấy tất cả trên một màn hình. Nhiều hơn thì dùng tab, vì pane chia đều và sẽ quá hẹp.
+   - Mặc định `--place auto`: agent đầu tiên mở pane bên phải bạn, agent thứ 2 và 3 mở pane bên dưới agent trước, từ agent thứ 4 mở tab mới. Người dùng muốn thấy bạn và agent con cùng lúc, nhưng pane quá nhỏ thì không đọc được. Người dùng nói "mở tab" thì dùng `--place tab`.
    - Câu giao việc: một hai câu, gồm đường dẫn tuyệt đối tới TASK.md, số bước, và branch chưa merge của phần khác nếu bước này cần.
    - Script in ra `terminal`. Ghi lại để gửi tin sau.
 3. Worktree mới: lần đầu Claude chạy ở đó, nó hỏi có tin thư mục này không. Agent hiện "Blocked" cho tới khi người dùng duyệt. Báo người dùng bấm vào agent đó để duyệt. Bạn không tự trả lời câu hỏi này.

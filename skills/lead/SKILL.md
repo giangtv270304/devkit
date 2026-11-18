@@ -1,6 +1,6 @@
 ---
 name: lead
-description: Biến phiên này thành người điều phối (lead) cho một project trong Herdr app. Sau khi gọi, người dùng chỉ cần prompt bằng lời thường; lead tự chọn trả lời, tự làm, hoặc giao cho agent khác qua skill herdr-dispatch. Người dùng gõ /lead, có thể kèm tên project hoặc thư mục.
+description: Phiên điều phối nhiều yêu cầu liên tiếp của một project trong Herdr app (lead). Người dùng chỉ cần prompt bằng lời thường; lead tự chọn trả lời, tự làm, hoặc giao việc qua herdr-dispatch (vòng đời một task thì do /work lo). Người dùng gõ /lead, có thể kèm tên project hoặc thư mục.
 argument-hint: "[project hoặc thư mục]"
 disable-model-invocation: true
 ---
@@ -14,7 +14,7 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 2. Xác định project: tham số của lệnh, không có thì thư mục hiện tại. Đọc `.claude/project.md` (nếu có) và `CLAUDE.md`. Ghi nhớ: `Layout:`, `Task dir:` (mặc định `.claude/work`), lệnh kiểm tra.
 3. Đặt nhãn: `hc label "$HC_TERMINAL_ID" role=lead project=<tên>`.
 4. Mở `<Task dir>/LEAD.md`, tạo nếu chưa có, theo mẫu ở cuối file này. Đọc mục "Đang chạy" và "Đồng ý sẵn".
-5. Đối chiếu với `hc ls`: agent nào trong "Đang chạy" còn sống, agent nào đã xong hay đã mất. Chạy lại tiến trình đánh thức nếu còn agent đang chạy (xem "Đánh thức").
+5. Đối chiếu với `hc ls`: agent nào trong "Đang chạy" còn sống, agent nào đã xong hay đã mất. Còn agent đang chạy thì chờ chúng theo `herdr-dispatch`.
 6. Báo người dùng trong 5 dòng: việc nào xong, việc nào chờ họ, việc nào đang chạy.
 
 ## Mỗi yêu cầu
@@ -31,7 +31,7 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 4. Giao việc:
    - Việc rõ và làm lại được: viết `<Task dir>/<slug>/TASK.md` ngắn (mục tiêu, thế nào là xong, phạm vi, các bước), rồi giao ngay bằng skill `herdr-dispatch`.
    - Việc đụng hợp đồng giữa các service, tiền, xác thực, dữ liệu cá nhân, nhiều repo, hoặc có nhiều cách làm: chạy `/work <slug>` tới ĐIỂM DỪNG 1, để người dùng duyệt kế hoạch, rồi mới giao.
-   - Để `dispatch.py` tự chọn chỗ (`--place auto`, mặc định): tối đa 3 agent thì mở thành pane cạnh lead, vì người dùng muốn thấy lead và agent con cùng lúc; từ agent thứ 4 thì mở tab. Người dùng nói "mở tab" thì dùng `--place tab`.
+   - Chỗ mở agent, số agent tối đa và cách chờ do `herdr-dispatch` quy định; không lặp lại ở đây.
 5. Ghi vào `LEAD.md` ngay trong lượt: việc đã xong, việc đã giao (slug, terminal, branch), hoặc việc chờ người dùng (câu hỏi).
 
 ## Tự quyết hay hỏi
@@ -40,16 +40,10 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 - Câu hỏi của agent con cũng là câu hỏi cho người dùng, trừ khi TASK.md, luật của người dùng, hoặc mục "Đồng ý sẵn" đã trả lời. Khi đó trả lời agent và nói đã dựa vào đâu.
 - Gom câu hỏi: tối đa 5 câu một lần, mỗi câu có lựa chọn và đề xuất.
 - Người dùng trả lời một câu mà câu đó áp dụng cho cả lần sau, thì ghi vào "Đồng ý sẵn" bằng đúng lời của họ.
-- Không push, không merge, không mở PR, trừ khi "Đồng ý sẵn" ghi rõ.
+- Push, merge, PR: theo ~/.claude/rules/preferences.md, trừ khi "Đồng ý sẵn" ghi rõ.
 
-## Đánh thức
-Không ngồi chờ agent con. Sau khi giao việc, chạy nền (`run_in_background`) lệnh `hc wait --children any`. Lệnh này kết thúc khi có agent xong, hỏi, hoặc kẹt, và bạn được báo. Khi được báo:
-1. Đọc tin `hc send` của agent, hoặc `hc read <terminal> --lines 60`.
-2. Kiểm tra thật: có commit mới hơn lúc giao việc, đúng branch, test qua. Đừng tin tin nhắn.
-3. Ghi kết quả vào TASK.md và `LEAD.md`, báo người dùng một hai dòng.
-4. Giao bước tiếp nếu có, rồi chạy lại lệnh chờ nếu còn agent đang chạy.
-
-Không quá 3 agent ghi code cùng lúc. Việc thứ tư thì xếp hàng trong "Đang chạy", ghi là "chờ chỗ".
+## Khi agent báo về
+Chờ, kiểm tra và ghi TASK.md theo `herdr-dispatch` (các bước 5 tới 7). Phần của lead: ghi kết quả vào `LEAD.md`, báo người dùng một hai dòng, rồi giao bước tiếp. Việc thứ tư trở đi xếp hàng trong "Đang chạy", ghi là "chờ chỗ".
 
 ## Kết thúc việc
 Khi mọi bước của một việc xong: gộp branch theo `herdr-dispatch` (với worktree), chạy kiểm tra của project, rồi hỏi người dùng về push hay PR. Dọn worktree và tab chỉ khi branch đã gộp và người dùng đồng ý. Chuyển việc sang mục "Xong" trong `LEAD.md`.

@@ -1,6 +1,6 @@
 ---
 name: work
-description: Điều phối một task từ đầu đến cuối trong một file duy nhất TASK.md (mục tiêu -> kế hoạch -> code -> kiểm tra -> review -> bàn giao). Skill chọn đường đi theo loại task và giao việc cho các agent architect, tester, developer, reviewer và security-reviewer. Dùng khi người dùng chạy /work, bắt đầu hoặc tiếp tục một task, xem các task đang làm, hoặc muốn biến một ý tưởng thành thay đổi code.
+description: Điều phối một task từ đầu đến cuối trong một file duy nhất TASK.md (mục tiêu -> kế hoạch -> code -> kiểm tra -> review -> bàn giao). Skill chọn đường đi theo loại task và giao việc cho các agent architect, tester, developer, reviewer và security-reviewer. Quản lý vòng đời của MỘT task. Dùng khi người dùng chạy /work, bắt đầu hoặc tiếp tục một task, xem các task đang làm, hoặc muốn biến một ý tưởng thành thay đổi code. Nhiều yêu cầu liên tiếp trong một phiên thì do /lead lo; giao việc cho agent trong Herdr thì gọi herdr-dispatch.
 ---
 
 # /work: điều phối task
@@ -19,18 +19,7 @@ Mỗi task có đúng một file: `<task>/TASK.md`, chép từ `${CLAUDE_SKILL_D
 
 `<task>/log.md` do hook ghi tự động: mỗi lần một session hoặc agent dừng là một dòng. Bạn không sửa file đó. Đọc 20 dòng cuối khi tiếp tục một task, để biết session khác đã làm gì.
 
-Người dùng không muốn đọc nhiều. Vì vậy:
-- **Tóm tắt** ở đầu file luôn đúng với trạng thái hiện tại. Tối đa 4 dòng. Dòng `CẦN BẠN:` nói đúng việc người dùng phải làm, hoặc `không`.
-- Viết ngắn. Không chép lại điều đã có ở mục khác. Không chép code vào file, trừ đoạn ngắn cho file thân của task high-risk.
-- Mục "Mục tiêu và phạm vi" tối đa khoảng 25 dòng. Mục "Kế hoạch" tối đa một màn hình. Nếu dài hơn, task quá to: đề xuất tách thành nhiều task.
-- File thay cho bàn giao giữa các session. Session sau chỉ biết những gì ghi trong file này.
-
-Cập nhật TASK.md ở mọi ĐIỂM DỪNG, khi xong mỗi mục trong Kế hoạch, và trước khi kết thúc mỗi lượt trả lời có việc mới: Tóm tắt, `Phase:`, `Cập nhật:`, checklist, quyết định mới.
-- `Phase:` chỉ chứa đúng một giá trị: `intent`, `plan`, `build`, `verify`, `review`, `ship`, `done`.
-- `Cập nhật:` dạng `YYYY-MM-DD`.
-- `Branch:` mỗi dòng `- <repo>: <branch>`. Dự án một repo thì ghi tên thư mục gốc.
-
-Viết file bằng tiếng Việt, theo ~/.claude/rules/writing-vi.md. Giữ nguyên chính xác code, đường dẫn, lệnh và tên test.
+Người dùng không muốn đọc nhiều: **Tóm tắt** ở đầu file (tối đa 4 dòng, có dòng `CẦN BẠN:`) luôn đúng với trạng thái hiện tại; viết ngắn, không chép lại; Mục tiêu tối đa ~25 dòng, Kế hoạch một màn hình. Cập nhật TASK.md ở mọi ĐIỂM DỪNG và trước khi kết thúc mỗi lượt có việc mới. Viết bằng tiếng Việt theo ~/.claude/rules/writing-vi.md. Quy tắc chi tiết của `Phase:`, `Cập nhật:`, `Branch:`: `reference/task-file.md`.
 
 ## Ghi chú của người dùng (NOTE)
 Người dùng sửa task bằng cách viết ghi chú ngay trong TASK.md, ở dòng bắt đầu bằng `> NOTE:`. Họ không cần trả lời từng câu trong chat.
@@ -77,18 +66,8 @@ Tìm gốc lỗi trước khi viết test. Nếu chưa biết gốc lỗi, test 
 Đưa mục "Nguyên nhân bug" cho tester. Test tái hiện phải fail vì đúng gốc lỗi đó.
 
 ## 3. Kế hoạch
-- feature, cross-repo, high-risk, spike: giao cho `architect`, kèm đường dẫn TASK.md. Bug: bạn tự viết kế hoạch từ mục "Nguyên nhân bug".
-- Ghi kế hoạch thành checklist trong mục "Kế hoạch". Mỗi bước: repo, kết quả cần đạt, số tiêu chí mà bước đó làm xong, agent, các file kèm thân/lá (file thân trước).
-- Kế hoạch chi tiết mà sai còn tệ hơn kế hoạch ngắn. Chỉ ghi đường dẫn file đã được mở và đọc. Không đoán tên file, tên hàm.
-- Bước có bên khác dùng (repo khác, client): thêm một dòng hợp đồng, nhận gì và trả gì.
-- Luôn có dòng "Cách tắt khi có lỗi". Chỉ có ba cách: biến môi trường bật/tắt, route mới chưa nối vào luồng cũ, hoặc deploy lại bản cũ. Với dòng tiền và xác thực, ưu tiên biến bật/tắt, mặc định tắt. Tên biến phải có trong `.env.example` và có test cho cả hai trạng thái.
-- High-risk: dưới mỗi bước, thêm đoạn code đề xuất ngắn (tối đa ~20 dòng, dạng `diff`) cho từng file thân. Kiểm tra mọi đoạn "code hiện tại" với file thật. Không đưa code cho file lá.
-- Branch mỗi repo: `feat/<slug>` (bug: `fix/<slug>`). Ghi vào `Branch:`.
-- Nếu architect đề xuất ADR, viết bản nháp trong thư mục ADR của dự án.
 
-Rà kế hoạch trước khi dừng:
-- Mọi task: tự kiểm tra mỗi tiêu chí có bước làm xong nó, và không còn chỗ "sẽ quyết sau".
-- High-risk và cross-repo: giao cho `reviewer` rà kế hoạch (phần "Khi được giao rà kế hoạch"). Chỉ đưa đường dẫn TASK.md, không đưa lý do của bạn. Sửa kế hoạch theo kết quả.
+Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn TASK.md; bug: tự viết kế hoạch từ "Nguyên nhân bug". Mỗi bước ghi repo, kết quả, tiêu chí, agent, file thân/lá. Chỉ ghi đường dẫn đã mở và đọc. Luôn có dòng "Cách tắt khi có lỗi". High-risk: thêm đoạn code đề xuất cho file thân. High-risk và cross-repo: giao `reviewer` rà kế hoạch trước khi dừng. Chi tiết: `reference/planning.md`.
 
 **ĐIỂM DỪNG 1**: Phase `plan`. Tóm tắt ghi `CẦN BẠN: đọc Mục tiêu và Kế hoạch; sửa bằng > NOTE: hoặc nói đồng ý`. Đưa link TASK.md. Hỏi luôn agent có được commit trên máy hay không. Mặc định là không commit.
 
@@ -110,25 +89,8 @@ Hook chặn sửa ngoài kế hoạch: khi developer hoặc tester sắp sửa m
 Chỉ chạy song song các bước ở những repo khác nhau, và chỉ khi Kế hoạch nói chúng độc lập. Không bao giờ chạy hai developer trong cùng một repo cùng lúc.
 
 ## 5. Kiểm tra
-Bạn tự kiểm tra, không tin báo cáo của agent. Chạy bộ kiểm tra của mỗi repo đã sửa: các lệnh trong mục "Checks" của project.md, hoặc trong CLAUDE.md của repo. Nếu API thay đổi, chạy lại lệnh sinh spec của repo.
 
-Mỗi lời khẳng định cần đúng một loại bằng chứng, vừa chạy xong:
-
-| Lời khẳng định | Bằng chứng bắt buộc |
-|---|---|
-| test qua | output và mã thoát của lệnh test, chạy sau lần sửa cuối |
-| lint sạch | output của lệnh lint |
-| agent đã làm xong | `git diff` của repo, không phải lời của agent |
-| bug đã sửa | triệu chứng ban đầu được thử lại và không còn |
-| tiêu chí N đạt | test tên X qua, hoặc request và response thật |
-
-Sau đó lấy bằng chứng chạy thật:
-- API hoặc handler: chạy service trên máy, gọi endpoint cho trường hợp đúng và ít nhất một trường hợp lỗi. Ghi request, status, response rút gọn. Xóa token, API key và dữ liệu cá nhân.
-- Giao diện: mở trang bằng browser, chụp màn hình, lưu vào `<task>/proof/`.
-- Có biến bật/tắt: kiểm tra cả lúc bật và lúc tắt.
-- Không chạy được trên máy: ghi rõ là chưa chạy thật và vì sao. Không bịa bằng chứng.
-
-Ghi mỗi kết quả một dòng vào "Quyết định và bằng chứng". Nếu có gì fail, gửi lại cho developer kèm output lỗi.
+Bạn tự kiểm tra, không tin báo cáo của agent: chạy bộ kiểm tra của mỗi repo đã sửa, mỗi lời khẳng định cần đúng một loại bằng chứng vừa chạy xong, rồi lấy bằng chứng chạy thật (API, giao diện, biến bật/tắt). Không chạy được thì ghi rõ, không bịa. Ghi mỗi kết quả một dòng vào "Quyết định và bằng chứng"; có gì fail thì gửi lại developer kèm output lỗi. Bảng bằng chứng và chi tiết: `reference/verification.md`.
 
 ## 6. Review
 Giao cho `reviewer`: đường dẫn TASK.md, các repo, branch và commit gốc. Với task high-risk, giao thêm cho `security-reviewer` cùng lúc. Không đưa cho reviewer báo cáo của developer hay tóm tắt của bạn.
@@ -142,9 +104,7 @@ Ghi vào mục "Review": chỉ blocker và major ở bảng, minor gom thành m�
 ## 7. Bàn giao
 Tóm tắt theo từng repo trong chat: branch, commit (nếu được phép), kết quả kiểm tra, các mục review còn mở.
 
-Commit message theo ~/.claude/rules/commits.md.
-
-Không bao giờ push, mở PR, chạy migration trên database dùng chung, hay deploy, nếu người dùng chưa đồng ý rõ ràng trong session này. Khi được nhờ mở PR, viết mô tả PR theo ~/.claude/rules/pull-requests.md: ngắn, không chép lại TASK.md.
+Commit theo ~/.claude/rules/commits.md, mô tả PR theo ~/.claude/rules/pull-requests.md, push và PR theo ~/.claude/rules/preferences.md. Thêm: không chạy migration trên database dùng chung, không deploy, nếu người dùng chưa đồng ý rõ ràng trong session này.
 
 ## 8. Rút kinh nghiệm
 Đề xuất trong một dòng, làm khi người dùng đồng ý:

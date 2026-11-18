@@ -1,6 +1,6 @@
 ---
 name: herdr-dispatch
-description: Giao từng bước của một task cho các agent riêng trong Herdr app, mỗi agent một tab hoặc một pane. Project nhiều repo thì mỗi repo một agent; repo đơn lẻ thì mỗi bước một git worktree. Dùng khi session đang chạy trong Herdr (có biến HC_TERMINAL_ID), kế hoạch trong TASK.md đã được duyệt, và người dùng muốn làm song song hoặc nói "giao việc", "dispatch", "mở tab cho từng repo", "chia worktree".
+description: Công cụ giao việc, do /lead hoặc /work gọi (không phải điểm vào của người dùng). Giao từng bước của một task cho các agent riêng trong Herdr app, mỗi agent một tab hoặc một pane. Project nhiều repo thì mỗi repo một agent; repo đơn lẻ thì mỗi bước một git worktree. Dùng khi session đang chạy trong Herdr (có biến HC_TERMINAL_ID), kế hoạch trong TASK.md đã được duyệt, và người dùng muốn làm song song hoặc nói "giao việc", "dispatch", "mở tab cho từng repo", "chia worktree".
 ---
 
 # herdr-dispatch: lead giao việc, agent con làm, lead ghi lại
@@ -43,7 +43,7 @@ Kế hoạch mà hai bước song song cùng sửa một file thì đừng chia 
 8. Hết bước:
    - Nhiều repo: tóm tắt trong TASK.md branch và commit của từng repo.
    - Worktree: gộp các branch vào branch của task theo thứ tự trong kế hoạch (`git merge --no-ff <branch>` trong repo chính). Có xung đột thì dừng và hỏi người dùng. Gộp xong mới dọn: hỏi người dùng rồi `git worktree remove <thư mục>` và `git branch -d <branch>`. Không dọn worktree của branch chưa gộp.
-   - Rồi đi tiếp `/work` (kiểm tra, review). Không push, không mở PR khi chưa hỏi.
+   - Rồi đi tiếp `/work` (kiểm tra, review). Push và PR theo ~/.claude/rules/preferences.md.
 
 ## Lệnh hay dùng
 - `hc ls`: các agent đang chạy.

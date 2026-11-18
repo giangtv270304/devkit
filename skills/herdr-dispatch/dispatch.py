@@ -146,7 +146,7 @@ def main():
             "name": a.name,
             "space": space,
             "folder": folder,
-            "argv": ["claude", *add_dir, "--"],
+            "argv": ["env", f"DEVKIT_ROLE={a.template}", "claude", *add_dir, "--"],
             "task": task,
             "focus": a.focus,
         }
@@ -154,11 +154,11 @@ def main():
     else:
         if not split_pane:
             sys.exit(f"could not find the pane of terminal {lead}")
-        script = 'cd "$1" && shift && exec claude "$@"'
+        script = 'cd "$1" && export DEVKIT_ROLE="$2" && shift 2 && exec claude "$@"'
         req = {
             "direction": place,
             "pane": split_pane,
-            "argv": ["sh", "-c", script, "sh", folder, *add_dir, "--", task],
+            "argv": ["sh", "-c", script, "sh", folder, a.template, *add_dir, "--", task],
         }
         res = herdr("do", "pane.split", json.dumps(req, ensure_ascii=False))
     print(json.dumps({"place": place, "terminal": res.get("terminal"), "pane": res.get("pane"),

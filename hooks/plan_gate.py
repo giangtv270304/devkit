@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""PreToolUse hook (Edit|Write|MultiEdit|NotebookEdit): ask the user before a gated subagent edits a file
-that the plan section of its TASK.md does not list. Anything it cannot decide, it allows."""
+"""PreToolUse hook (Edit|Write|MultiEdit|NotebookEdit): ask the user before a gated agent edits a file
+that the plan section of its TASK.md does not list. A gated agent is a subagent whose type is listed, or a
+session started with a listed DEVKIT_ROLE (herdr-dispatch workers). Anything it cannot decide, it allows."""
 import json
 import os
 import re
@@ -10,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tasklib  # noqa: E402
 
-GATED_AGENTS = set(filter(None, os.environ.get("PLAN_GATE_AGENTS", "developer,tester").split(",")))
+GATED_AGENTS = set(filter(None, os.environ.get("PLAN_GATE_AGENTS", "developer,tester,worker").split(",")))
 PLAN_HEADINGS = ("kế hoạch", "plan")
 ALWAYS_OK = re.compile(r"(_test\.go|\.(test|spec)\.[cm]?[jt]sx?|/testdata/.*|/__snapshots__/.*)$")
 BACKTICKED = re.compile(r"`([^`\s]+)`")
@@ -32,7 +33,8 @@ def listed(target, paths):
 
 def main():
     data = tasklib.read_input()
-    if data.get("agent_type") not in GATED_AGENTS:
+    role = data.get("agent_type") or os.environ.get("DEVKIT_ROLE")
+    if role not in GATED_AGENTS:
         return
     tool_input = data.get("tool_input") or {}
     target = tool_input.get("file_path") or tool_input.get("notebook_path")
@@ -46,7 +48,7 @@ def main():
     paths = plan_paths(task)
     if not paths or listed(target, paths):
         return
-    reason = f"{data['agent_type']} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {target}"
+    reason = f"{role} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {target}"
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": "ask",

@@ -41,26 +41,36 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 
 | Path | What |
 |---|---|
+| **Entry points** (you type them) | |
 | `skills/work` | one `TASK.md` per task: goal, plan, build, verify, review, ship; two approval stops |
+| `skills/lead` | `/lead` in a Herdr tab: the session coordinates a project; each plain request is answered, done in place, or delegated through `herdr-dispatch`, with `LEAD.md` as its memory |
+| `skills/design` | `/design`: context, non-functional needs, options, an ADR with diagrams |
 | `skills/review-pr` | review someone else's PR in a separate worktree |
 | `skills/research` | sourced answers at three depths, any domain |
 | `skills/brainstorm` | from a vague idea to a decision record |
-| `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
+| **Conventions** (loaded before writing code) | |
 | `skills/go-service` | Go service conventions with a reference service |
-| `skills/sdk-wrapper` | conventions for an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
-| `skills/lead` | `/lead` in any Herdr tab: the session becomes the project's coordinator; each plain request is answered, done in place, or delegated through `herdr-dispatch`, with `LEAD.md` as its memory |
-| `skills/herdr-dispatch` | give each step of a plan to its own agent in a Herdr tab or pane: one agent per repo, or one git worktree per step in a single repo |
-| `herdr/templates` | `worker.md` and `reviewer.md`: rules `herdr-dispatch` copies into an agent's first message; linked to `~/.config/herdr-core/templates/` |
+| `skills/sdk-wrapper` | an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
+| `skills/data-design` | data model, keys, indexes, expand/contract migrations, backfills, ledgers |
+| `skills/ops-change` | Dockerfile, CI/CD, deploy config, secrets, monitoring, rollback, runbooks |
+| `skills/frontend-change` | web and mobile screens: states, API contract, verification in a browser or simulator |
+| **Methods** | |
+| `skills/tdd`, `skills/debug` | test first; find the root cause before fixing |
+| `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
+| **Herdr** (see the Herdr section) | |
+| `skills/herdr-dispatch` | open an agent as a pane or tab: a one-off with `helper`, or plan steps with `worker` (one agent per repo, or one git worktree per step) |
+| `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (hands the diff to the `reviewer` agent), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
+| **Shared** | |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
-| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, fixing an instruction after a correction |
+| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, fixing an instruction after a correction, opening agents inside Herdr |
 | `output-styles/` | `engineer-brief` and `plain-words` reply styles |
-| `templates/project.md` | starting point for a project's `.claude/project.md` |
+| `templates/project.md`, `templates/adr.md` | starting points for a project's `.claude/project.md` and for an ADR when the project has no template |
 | `settings/user.fragment.json` | hooks and deny rules that `install.py` merges into `~/.claude/settings.json` |
 | `denylist.example.txt` | format of `~/.config/devkit/denylist.txt`, read by the pre-commit hook |
 | `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
-| `hooks/plan_gate.py` | asks before developer or tester edits a file the plan does not list |
+| `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list |
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
 | `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |
@@ -71,6 +81,8 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 ## Herdr
 
 In a single repo, `herdr-dispatch` gives each independent step its own worktree (`dispatch.py --worktree <branch>`); the lead merges the branches in plan order and removes a worktree only after its branch is merged. Worktrees go to `worktrees.directory` in `~/.config/herdr-app/settings.json` (default `~/.herdr/worktrees`). Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
+
+Claude desktop and Herdr run the same flow. `/work` uses subagents outside Herdr and `herdr-dispatch` inside it; either way a step is test first, edits outside the plan go through `plan_gate`, the agent reports `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN` or `BLOCKED`, and only the coordinator writes `TASK.md`. The Herdr reviewer session hands the diff to the `reviewer` agent, so review rules live only in `agents/`. A repo that another task is already using (not on its default branch, uncommitted changes, or an agent in it) always gets a worktree.
 
 ## Rules for this repo
 

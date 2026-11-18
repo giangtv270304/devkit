@@ -29,7 +29,7 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 | **Giao việc** | Mọi việc còn lại, nhất là khi có nhiều phần làm song song được. |
 
 4. Giao việc:
-   - Việc rõ và làm lại được: viết `<Task dir>/<slug>/TASK.md` ngắn (mục tiêu, thế nào là xong, phạm vi, các bước), rồi giao ngay bằng skill `herdr-dispatch`.
+   - Việc rõ và làm lại được: viết `<Task dir>/<slug>/TASK.md` ngắn (mục tiêu, thế nào là xong, phạm vi, các bước kèm file sẽ sửa trong dấu backtick), đưa người dùng duyệt trong một tin nhắn, rồi giao bằng skill `herdr-dispatch`. Lần duyệt này là ĐIỂM DỪNG 1 của việc đó. Chỉ bỏ qua bước duyệt khi mục "Đồng ý sẵn" cho phép đúng loại việc này.
    - Việc đụng hợp đồng giữa các service, tiền, xác thực, dữ liệu cá nhân, nhiều repo, hoặc có nhiều cách làm: chạy `/work <slug>` tới ĐIỂM DỪNG 1, để người dùng duyệt kế hoạch, rồi mới giao.
    - Chỗ mở agent, số agent tối đa và cách chờ do `herdr-dispatch` quy định; không lặp lại ở đây.
 5. Ghi vào `LEAD.md` ngay trong lượt: việc đã xong, việc đã giao (slug, terminal, branch), hoặc việc chờ người dùng (câu hỏi).

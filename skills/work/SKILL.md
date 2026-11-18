@@ -47,7 +47,9 @@ Xem nhanh các repo được nhắc tới (CLAUDE.md của repo, tài liệu ki�
 
 Một task có thể vừa là cross-repo vừa là high-risk. Khi đó áp dụng cả hai. Nói loại và đường đi cho người dùng trong một dòng. Không dừng để hỏi xác nhận loại: người dùng sửa bằng NOTE ở điểm dừng 1 nếu cần.
 
-Mục tiêu còn mơ hồ (chưa biết làm gì, có nhiều hướng): đề xuất skill `brainstorm` trước, rồi quay lại đây với bản quyết định.
+Mục tiêu còn mơ hồ (chưa biết làm gì, có nhiều hướng): đề xuất skill `brainstorm` trước, rồi quay lại đây với bản quyết định. Đã rõ mục tiêu nhưng có lựa chọn kiến trúc lớn (service mới, tích hợp mới, đổi luồng giữa các service): đề xuất `/design` trước, rồi quay lại với ADR.
+
+Task đụng schema hoặc migration, hạ tầng hoặc deploy, hay giao diện thì ghi vào `Loại:` thêm `data`, `ops` hoặc `ui`. Architect và developer áp dụng skill `data-design`, `ops-change` hoặc `frontend-change` tương ứng. Thay đổi `data` và `ops` luôn có file thân.
 
 ## 2. Hỏi ngắn (không áp dụng cho small)
 Chỉ hỏi về phần khó: hành vi chưa rõ, trường hợp biên, cách xử lý lỗi, tương thích ngược, những gì nằm ngoài phạm vi. Chỉ hỏi khi câu trả lời làm đổi thứ sẽ làm. Mỗi câu kèm câu trả lời bạn đề xuất. Một vòng AskUserQuestion, tối đa 4 câu. Không hỏi những gì bạn tìm được trong code. Nếu không có gì khó, bỏ qua bước này.
@@ -86,7 +88,7 @@ Làm từng mục trong Kế hoạch, theo thứ tự:
 
 Hook chặn sửa ngoài kế hoạch: khi developer hoặc tester sắp sửa một file không có trong mục Kế hoạch, Claude Code hỏi người dùng. Nếu người dùng từ chối, coi như `NEEDS_REPLAN`.
 
-Chỉ chạy song song các bước ở những repo khác nhau, và chỉ khi Kế hoạch nói chúng độc lập. Không bao giờ chạy hai developer trong cùng một repo cùng lúc.
+Chỉ chạy song song các bước khi Kế hoạch nói chúng độc lập và mỗi bước có thư mục riêng: repo khác nhau, hoặc git worktree riêng của cùng một repo. Không bao giờ để hai agent ghi vào cùng một thư mục cùng lúc, vì chúng ghi đè file và đổi branch của nhau. Session chạy trong Herdr (có `HC_TERMINAL_ID`) thì giao các bước song song bằng skill `herdr-dispatch`; ngoài Herdr thì dùng subagent như trên.
 
 ## 5. Kiểm tra
 

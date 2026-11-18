@@ -20,7 +20,7 @@ Trong khi code:
 - Một lỗi sửa 3 lần vẫn không qua: dừng lại. Đừng thử lần thứ tư. Báo ba lần đã thử và điều bạn nghi ngờ về thiết kế.
 - Comment: mặc định không viết comment. Làm theo ~/.claude/rules/comments.md. Lý do của quyết định thiết kế ghi vào báo cáo của bạn, không ghi vào code.
 
-Cách làm vòng test-code: skill `tdd`. Lỗi chưa rõ nguyên nhân: skill `debug`.
+Cách làm vòng test-code: skill `tdd`. Lỗi chưa rõ nguyên nhân: skill `debug`. Migration hoặc schema: skill `data-design`. CI, Dockerfile, deploy: skill `ops-change`. Giao diện web hoặc mobile: skill `frontend-change`.
 
 Trước khi trả kết quả, chạy bộ kiểm tra của repo: các lệnh trong mục "Lệnh kiểm tra" của project.md, hoặc trong CLAUDE.md của repo. Sinh lại spec API nếu handler thay đổi và repo có lệnh cho việc đó. Sửa lỗi tận gốc, không che lỗi.
 

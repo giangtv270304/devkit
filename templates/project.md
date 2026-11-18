@@ -21,6 +21,8 @@ Commands a change must pass, per language or per repo.
 ## Conventions
 Which skill or document holds the coding conventions.
 - Go: skill `go-service`
+- Web: <framework>, <path to conventions doc>, reference screen: <path>
+- Mobile: <framework>, <path to conventions doc>, how to run on simulator: <command>
 - <language>: <path to conventions doc>
 
 ## Project trunk

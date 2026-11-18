@@ -38,7 +38,8 @@ So sánh branch của task với branch gốc trong mỗi repo, rồi kiểm tra
 5. Tiền và trạng thái: kiểu decimal, idempotency (gửi lại nhiều lần vẫn chỉ tạo một kết quả), lưu vào database trước khi gọi ra ngoài, transaction.
 6. Test: mỗi tiêu chí có một test sẽ fail nếu bỏ thay đổi này không? Báo là major nếu test chỉ để tăng độ phủ: không assert gì, chỉ assert là không lỗi, mock luôn phần code đang test, hay lặp lại đúng logic của code. Lint và test có qua khi bạn chạy không?
 7. Log: không có secret, token, số thẻ, API key.
-8. Comment (~/.claude/rules/comments.md): đánh dấu minor mọi comment mới không qua bài kiểm tra của rule. Đề xuất cách sửa: xóa, đổi tên, hoặc chuyển lý do vào mô tả PR / log message.
+8. Theo loại file, kiểm tra thêm theo skill tương ứng: migration và schema theo `data-design` (expand/contract, khóa bảng, backfill theo lô, có cách lùi); CI, Dockerfile, deploy theo `ops-change` (ghim phiên bản, không secret, có cách lùi); giao diện theo `frontend-change` (đủ trạng thái tải/rỗng/lỗi, không giữ token ở client, có ảnh chụp bằng chứng).
+9. Comment (~/.claude/rules/comments.md): đánh dấu minor mọi comment mới không qua bài kiểm tra của rule. Đề xuất cách sửa: xóa, đổi tên, hoặc chuyển lý do vào mô tả PR / log message.
 
 Không báo lỗi vặt: tên biến, style, format, thứ tự import, hay cách viết bạn thích hơn. Lint lo phần đó. Chỉ báo tên gọi khi nó làm người đọc hiểu sai hành vi.
 

@@ -11,6 +11,8 @@ Viết ngắn. Người dùng đọc kết quả của bạn trong TASK.md, và 
 
 Bắt đầu từ `.claude/project.md` ở gốc dự án (nếu có), CLAUDE.md ở gốc, các tài liệu kiến trúc và hợp đồng mà project.md chỉ tới, và CLAUDE.md của mỗi repo bạn đụng tới. Xác nhận mọi điều trong code (grep đường dẫn endpoint, tên event, biến môi trường trên mọi repo liên quan). Tài liệu có thể đã cũ.
 
+Theo loại thay đổi, áp dụng skill tương ứng và ghi phần bắt buộc của nó vào Kế hoạch: schema, migration, backfill thì `data-design`; Dockerfile, CI, deploy, hạ tầng, biến môi trường thì `ops-change`; màn hình web hoặc mobile thì `frontend-change`; lựa chọn kiến trúc lớn (service mới, tích hợp mới, đổi luồng giữa các service) thì đề xuất chạy `/design` trước.
+
 Kế hoạch chi tiết mà sai còn tệ hơn kế hoạch ngắn. Chỉ ghi đường dẫn file chính xác khi bạn đã mở file đó. Phần còn lại ghi kết quả cần đạt, không đoán tên file hay tên hàm.
 
 Trả về theo đúng thứ tự này:

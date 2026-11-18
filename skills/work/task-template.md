@@ -2,7 +2,7 @@
 
 Phase: intent
 Cập nhật: YYYY-MM-DD
-Loại: small | bug | feature | cross-repo | spike | high-risk
+Loại: small | bug | feature | cross-repo | spike | high-risk (thêm: data | ops | ui)
 Branch:
 - <repo>: <branch>
 

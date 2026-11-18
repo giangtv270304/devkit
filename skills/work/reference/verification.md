@@ -14,7 +14,10 @@ Mỗi lời khẳng định cần đúng một loại bằng chứng, vừa ch�
 
 Sau đó lấy bằng chứng chạy thật:
 - API hoặc handler: chạy service trên máy, gọi endpoint cho trường hợp đúng và ít nhất một trường hợp lỗi. Ghi request, status, response rút gọn. Xóa token, API key và dữ liệu cá nhân.
-- Giao diện: mở trang bằng browser, chụp màn hình, lưu vào `<task>/proof/`.
+- Giao diện web: chạy dev server, mở trang trong trình duyệt (browser pane của Claude desktop, hoặc trình duyệt trong Herdr), đi qua các trạng thái tải, có dữ liệu, rỗng, lỗi; chụp màn hình vào `<task>/proof/`; xem console không có lỗi mới.
+- Giao diện mobile: chạy trên simulator hoặc emulator (iOS Simulator của Claude desktop nếu có), chụp từng trạng thái vào `<task>/proof/`.
+- Hạ tầng và deploy: kết quả lệnh xem trước (`terraform plan`, `kubectl diff`, `--dry-run`), không áp dụng khi chưa được đồng ý.
+- Migration: chạy up rồi down rồi up trên database local, ghi số dòng trước và sau backfill.
 - Có biến bật/tắt: kiểm tra cả lúc bật và lúc tắt.
 - Không chạy được trên máy: ghi rõ là chưa chạy thật và vì sao. Không bịa bằng chứng.
 

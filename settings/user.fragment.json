@@ -36,6 +36,10 @@
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/plan_gate.py\"", "timeout": 10}]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/herdr_agent_gate.py\"", "timeout": 10}]
       }
     ],
     "PostToolUse": [

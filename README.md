@@ -71,6 +71,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
 | `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list |
+| `hooks/herdr_agent_gate.py` | inside Herdr, denies developer and tester subagents so code steps run in a visible worker pane |
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
 | `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |

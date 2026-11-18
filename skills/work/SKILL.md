@@ -5,7 +5,11 @@ description: Điều phối một task từ đầu đến cuối trong một fil
 
 # /work: điều phối task
 
-Bạn chạy trong session chính, từ thư mục gốc của dự án. Bạn điều phối các subagent (agent con). Subagent không gọi được nhau, chỉ bạn giao việc cho chúng.
+Bạn chạy trong session chính, từ thư mục gốc của dự án. Bạn điều phối các agent. Agent không gọi được nhau, chỉ bạn giao việc cho chúng.
+
+Kiểm tra `echo $HC_TERMINAL_ID` trước khi giao việc đầu tiên:
+- Có giá trị (session chạy trong Herdr): mỗi bước ghi code mở thành một pane bằng skill `herdr-dispatch` với `--template worker`, kể cả khi chỉ có một bước. Worker tự viết test trước, nên tester và developer của cùng một bước gộp vào một pane. Subagent (Agent tool) chỉ dùng cho việc chỉ đọc: architect, reviewer, security-reviewer, tìm kiếm. Lý do: người dùng cần thấy agent đang ghi code và chen vào được; subagent chạy nền thì không. Hook `herdr_agent_gate` chặn subagent tester và developer trong Herdr.
+- Trống (Claude desktop, terminal thường): dùng subagent tester và developer như mô tả bên dưới.
 
 ## Cấu hình của dự án
 Trước tiên đọc `.claude/project.md` ở gốc dự án, nếu có. File đó cho biết: dự án là một repo hay một thư mục chứa nhiều repo, thư mục task, thư mục ADR và note, tài liệu kiến trúc và hợp đồng, lệnh kiểm tra, skill quy ước cho từng ngôn ngữ, và danh sách thân riêng. Mẫu: `templates/project.md` trong repo devkit (`~/.claude/devkit/templates/project.md`).
@@ -88,7 +92,7 @@ Làm từng mục trong Kế hoạch, theo thứ tự:
 
 Hook chặn sửa ngoài kế hoạch: khi developer hoặc tester sắp sửa một file không có trong mục Kế hoạch, Claude Code hỏi người dùng. Nếu người dùng từ chối, coi như `NEEDS_REPLAN`.
 
-Chỉ chạy song song các bước khi Kế hoạch nói chúng độc lập và mỗi bước có thư mục riêng: repo khác nhau, hoặc git worktree riêng của cùng một repo. Không bao giờ để hai agent ghi vào cùng một thư mục cùng lúc, vì chúng ghi đè file và đổi branch của nhau. Session chạy trong Herdr (có `HC_TERMINAL_ID`) thì giao các bước song song bằng skill `herdr-dispatch`; ngoài Herdr thì dùng subagent như trên.
+Chỉ chạy song song các bước khi Kế hoạch nói chúng độc lập và mỗi bước có thư mục riêng: repo khác nhau, hoặc git worktree riêng của cùng một repo. Không bao giờ để hai agent ghi vào cùng một thư mục cùng lúc, vì chúng ghi đè file và đổi branch của nhau. Trong Herdr, mỗi bước song song là một pane worker riêng (xem đầu file); ngoài Herdr thì dùng subagent như trên.
 
 ## 5. Kiểm tra
 

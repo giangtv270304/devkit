@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Người thiết kế hệ thống, chỉ đọc. Dùng để đọc mục tiêu trong TASK.md, tìm mọi repo và hợp đồng bị ảnh hưởng, so sánh các cách làm, và soạn mục Kế hoạch của TASK.md hoặc ADR. Không bao giờ sửa code.
+description: Người thiết kế hệ thống, chỉ đọc. Dùng khi cần đọc mục tiêu trong TASK.md, tìm mọi repo và hợp đồng bị ảnh hưởng, so sánh các cách làm, và soạn mục Kế hoạch của TASK.md hoặc ADR. Không bao giờ sửa code.
 tools: Read, Grep, Glob, WebSearch, WebFetch
 # model: opus, because plan mistakes cost the most and the agent only reads.
 model: opus

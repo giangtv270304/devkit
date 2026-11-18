@@ -9,6 +9,7 @@ lint:
 	done
 	@python3 -m py_compile install.py hooks/*.py skills/*/*.py tests/*.py
 	@find . -name __pycache__ -not -path './.git/*' -prune -exec rm -rf {} +
+	@cd tests && python3 -m unittest test_skills
 	@if command -v shellcheck >/dev/null 2>&1; then \
 		shellcheck hooks/*.sh hooks/lib/*.sh git-local/*.sh git-local/commit-msg git-local/pre-push; \
 	else echo "warning: shellcheck not installed, skipped"; fi

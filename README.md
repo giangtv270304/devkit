@@ -35,7 +35,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 ## Per project
 
 - Copy `templates/project.md` to `<project>/.claude/project.md` and fill in what differs from the defaults.
-- Keep AI files out of the project's git and block pushes that carry them: `git-local/install.sh <repo or folder of repos>`.
+- Keep AI files out of the project's git and block pushes that carry them: `git-local/install.sh <repo or folder of repos>`. It copies the hooks, so run it again after you change a hook in `git-local/`.
 
 ## Layout
 
@@ -53,12 +53,20 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `herdr/templates` | `worker.md` and `reviewer.md`: rules `herdr-dispatch` copies into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
-| `rules/` | comments, commits, pull requests, review levels, writing style, preferences |
+| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, fixing an instruction after a correction |
+| `output-styles/` | `engineer-brief` and `plain-words` reply styles |
+| `templates/project.md` | starting point for a project's `.claude/project.md` |
+| `settings/user.fragment.json` | hooks and deny rules that `install.py` merges into `~/.claude/settings.json` |
+| `denylist.example.txt` | format of `~/.config/devkit/denylist.txt`, read by the pre-commit hook |
+| `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
 | `hooks/plan_gate.py` | asks before developer or tester edits a file the plan does not list |
 | `hooks/format-edited-file.sh` | formats the file just edited |
-| `git-local/` | hide AI files from git and block pushing them, in any repo |
-| `bin/` | command-line tools (reserved) |
+| `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
+| `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |
+| `hooks/comment-guard.sh` | after an edit to Go, TS/JS or SQL, sends new comment lines back to Claude to delete unless they pass `rules/comments.md` |
+| `git-local/` | hide AI files from git, block pushing them, and reject commit messages that break `rules/commits.md`, in any repo |
+| `tests/`, `Makefile` | `make test` runs the unit tests; `make lint` runs `bash -n`, `py_compile` and `shellcheck`/`ruff` when installed |
 
 ## Herdr
 

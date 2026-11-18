@@ -51,6 +51,14 @@ def auto_place(lead_pane, others):
     return "tab", None
 
 
+def lead_folder(terminal):
+    out = subprocess.run(["hc", "get", terminal, "--json"], capture_output=True, text=True, timeout=15)
+    if out.returncode != 0:
+        return os.getcwd()
+    d = json.loads(out.stdout)
+    return (d.get("foreground") or {}).get("cwd") or d.get("cwd") or os.getcwd()
+
+
 def worktrees_root():
     try:
         with open(os.path.expanduser("~/.config/herdr-app/settings.json"), encoding="utf-8") as f:
@@ -114,18 +122,23 @@ def main():
         body = body.split("---", 2)[2]
     rules = " ".join(line.strip() for line in body.strip().splitlines() if line.strip())
 
+    # Only the lead's own folder is added: the user trusted it when starting the lead, so no
+    # per-session "add this directory?" prompt appears (that prompt defaults to exit).
+    root = lead_folder(lead)
     created = False
     if a.worktree:
         main_repo = git(repo, "rev-parse", "--show-toplevel")
         folder, created = ensure_worktree(main_repo, a.worktree, a.base)
-        readable = main_repo
         where = (f"Bạn làm trong git worktree {folder}, branch {a.worktree}. "
                  f"Repo chính ở {main_repo}: chỉ đọc (TASK.md, tài liệu), không sửa, không đổi branch của nó. "
                  f"Các bước khác có thể đang chạy song song ở worktree khác.")
     else:
         folder = repo
-        readable = os.path.dirname(repo)
-        where = f"Bạn làm trong repo {folder}. Thư mục {readable} chứa các repo khác: chỉ đọc."
+        where = f"Bạn làm trong {folder}."
+    readable = root if root and os.path.realpath(root) != os.path.realpath(folder) else None
+    if readable:
+        where += f" Thư mục {readable} (TASK.md, tài liệu, repo khác): chỉ đọc."
+    add_dir = ["--add-dir", readable] if readable else []
     task = f"{rules} {where} Terminal điều phối: {lead}. Việc của bạn: {a.task}"
 
     if place == "tab":
@@ -133,7 +146,7 @@ def main():
             "name": a.name,
             "space": space,
             "folder": folder,
-            "argv": ["claude", "--add-dir", readable, "--"],
+            "argv": ["claude", *add_dir, "--"],
             "task": task,
             "focus": a.focus,
         }
@@ -141,10 +154,11 @@ def main():
     else:
         if not split_pane:
             sys.exit(f"could not find the pane of terminal {lead}")
+        script = 'cd "$1" && shift && exec claude "$@"'
         req = {
             "direction": place,
             "pane": split_pane,
-            "argv": ["sh", "-c", 'cd "$1" && exec claude --add-dir "$2" -- "$3"', "sh", folder, readable, task],
+            "argv": ["sh", "-c", script, "sh", folder, *add_dir, "--", task],
         }
         res = herdr("do", "pane.split", json.dumps(req, ensure_ascii=False))
     print(json.dumps({"place": place, "terminal": res.get("terminal"), "pane": res.get("pane"),

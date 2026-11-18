@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Installed by devkit git-local/install.sh. Enforces rules/commits.md: one type(scope): line, no AI attribution.
+set -euo pipefail
+
+message=$(git stripspace --strip-comments < "$1")
+subject=$(printf '%s\n' "$message" | sed -n '1p')
+
+case "$subject" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *|amend!\ *) exit 0 ;;
+esac
+
+fail() {
+  printf 'commit-msg: %s\n' "$1" >&2
+  printf '  %s\n' "$subject" >&2
+  echo "To commit anyway on purpose: git commit --no-verify" >&2
+  exit 1
+}
+
+if printf '%s\n' "$message" | grep -Eiq 'co-authored-by:.*(claude|anthropic|copilot|cursor|openai|chatgpt|gemini)|generated with \[?claude|🤖 generated'; then
+  fail "AI attribution is not allowed"
+fi
+printf '%s\n' "$subject" | grep -Eq '^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\([[:alnum:]./_-]+\))?!?: [^[:space:]]' \
+  || fail "expected type(scope): what"
+[ "${#subject}" -le 72 ] || fail "subject is ${#subject} characters, max 72"
+[ -n "${DEVKIT_COMMIT_BODY:-}" ] || [ "$(printf '%s\n' "$message" | sed '/^[[:space:]]*$/d' | wc -l | tr -d ' ')" -eq 1 ] \
+  || fail "one line only, no body (set DEVKIT_COMMIT_BODY=1 when a body is asked for)"

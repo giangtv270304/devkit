@@ -5,6 +5,8 @@
   ./install.py --apply         do it
   ./install.py --apply --copy-agents   copy agent files instead of linking them
   ./install.py --uninstall [--apply]   remove links and the hook entries this repo added
+
+Environment: CLAUDE_CONFIG_DIR, DEVKIT_HERDR_TEMPLATES and DEVKIT_BIN_DIR move the three targets (tests use them).
 """
 import json
 import os
@@ -16,10 +18,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent
 CLAUDE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
 SETTINGS = CLAUDE / "settings.json"
-HERDR_TEMPLATES = Path.home() / ".config" / "herdr-core" / "templates"
-BIN = Path.home() / ".local" / "bin"
+HERDR_TEMPLATES = Path(os.environ.get("DEVKIT_HERDR_TEMPLATES") or Path.home() / ".config" / "herdr-core" / "templates")
+BIN = Path(os.environ.get("DEVKIT_BIN_DIR") or Path.home() / ".local" / "bin")
 FRAGMENT = REPO / "settings" / "user.fragment.json"
-MARK = "/.claude/devkit/"
+KIT = CLAUDE / "devkit"
+PLACEHOLDER = "$HOME/.claude/devkit"
+MARKS = (f"{KIT}/", f"{PLACEHOLDER}/")
 APPLY = "--apply" in sys.argv
 UNINSTALL = "--uninstall" in sys.argv
 COPY_AGENTS = "--copy-agents" in sys.argv
@@ -80,50 +84,90 @@ def hook_commands(entry):
     return [h.get("command", "") for h in entry.get("hooks", [])]
 
 
-def merge_settings():
-    current = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
+def is_ours(entry):
+    return any(m in c for c in hook_commands(entry) for m in MARKS)
+
+
+def load_settings():
+    if not SETTINGS.exists():
+        return {}
+    try:
+        data = json.loads(SETTINGS.read_text())
+    except json.JSONDecodeError as e:
+        sys.exit(f"error: {SETTINGS} is not valid JSON ({e}). Fix it by hand; nothing was changed.")
+    if not isinstance(data, dict):
+        sys.exit(f"error: {SETTINGS} is not a JSON object. Nothing was changed.")
+    return data
+
+
+def load_fragment():
+    # Hook commands name the kit under the target config dir, so resolve the placeholder here.
+    text = FRAGMENT.read_text()
+    if CLAUDE != Path.home() / ".claude":
+        text = text.replace(PLACEHOLDER, json.dumps(str(KIT))[1:-1])
+    return json.loads(text)
+
+
+def write_atomic(path, text):
+    tmp = path.with_name(f".{path.name}.devkit-tmp")
+    tmp.write_text(text)
+    if path.exists():
+        shutil.copymode(path, tmp)
+    os.replace(tmp, path)
+
+
+def merge_settings(current):
     merged = json.loads(json.dumps(current))
-    fragment = json.loads(FRAGMENT.read_text())
+    fragment = load_fragment()
     changes = []
 
     deny = merged.setdefault("permissions", {}).setdefault("deny", [])
     for rule in fragment["permissions"]["deny"]:
-        if UNINSTALL:
-            continue
-        if rule not in deny:
+        if UNINSTALL and rule in deny:
+            deny.remove(rule)
+            changes.append(("deny", rule, "remove"))
+        elif not UNINSTALL and rule not in deny:
             deny.append(rule)
             changes.append(("deny", rule, "add"))
+    if not deny:
+        del merged["permissions"]["deny"]
+    if not merged["permissions"]:
+        del merged["permissions"]
 
     hooks = merged.setdefault("hooks", {})
     for event, entries in fragment["hooks"].items():
         have = hooks.setdefault(event, [])
         if UNINSTALL:
-            keep = [e for e in have if not any(MARK in c for c in hook_commands(e))]
+            keep = [e for e in have if not is_ours(e)]
             if len(keep) != len(have):
                 changes.append(("hook", event, "remove"))
             hooks[event] = keep
-            if not keep:
-                del hooks[event]
-            continue
-        existing = {c for e in have for c in hook_commands(e)}
-        for entry in entries:
-            if not set(hook_commands(entry)) <= existing:
-                have.append(entry)
-                changes.append(("hook", event, "add"))
+        else:
+            # Entries that run kit commands are owned by the kit: replace any that differ from the fragment.
+            keep = [e for e in have if not is_ours(e) or e in entries]
+            dropped = len(keep) != len(have)
+            fresh = [e for e in entries if e not in keep]
+            keep.extend(fresh)
+            if fresh or dropped:
+                changes.append(("hook", event, "update" if dropped else "add"))
+            hooks[event] = keep
+        if not hooks[event]:
+            del hooks[event]
     if not merged["hooks"]:
         del merged["hooks"]
 
-    if not changes:
+    if merged == current:
         return row("settings", SETTINGS.name, "in sync")
     backup = ""
     if APPLY:
         if SETTINGS.exists():
             backup = f"{SETTINGS}.devkit-bak-{datetime.now():%Y%m%d-%H%M%S}"
             shutil.copy2(SETTINGS, backup)
-        SETTINGS.write_text(json.dumps(merged, indent=2, ensure_ascii=False) + "\n")
+        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+        write_atomic(SETTINGS, json.dumps(merged, indent=2, ensure_ascii=False) + "\n")
+    done = {"add": "added", "remove": "removed", "update": "updated"}
     for kind, name, action in changes:
-        done = {"add": "added", "remove": "removed"}[action]
-        row(kind, name, done if APPLY else f"would {action}", f"backup: {backup}" if backup else "")
+        row(kind, name, done[action] if APPLY else f"would {action}", f"backup: {backup}" if backup else "")
 
 
 def main():
@@ -132,9 +176,10 @@ def main():
     print(f"        {HERDR_TEMPLATES}, {BIN}")
     mode = "APPLY" if APPLY else "DRY RUN (nothing is written)"
     print(f"mode:   {mode}{' / UNINSTALL' if UNINSTALL else ''}\n")
+    current = load_settings()
     for kind, dst, src in items():
         (unlink if UNINSTALL else link)(kind, dst, src)
-    merge_settings()
+    merge_settings(current)
     w = [max(len(r[i]) for r in rows) for i in range(3)]
     for r in rows:
         print(f"{r[0]:<{w[0]}}  {r[1]:<{w[1]}}  {r[2]:<{w[2]}}  {r[3]}".rstrip())

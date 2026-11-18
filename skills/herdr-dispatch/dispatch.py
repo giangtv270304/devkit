@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """Start claude with a worker task in the lead's Herdr space: as a new tab, or as a pane beside the lead.
 
-Usage: dispatch.py <repo_dir> <name> <task> [--place tab|right|down] [--template NAME] [--focus]
+Usage:
+  dispatch.py <repo_dir> <name> <task> [--place tab|right|down] [--template NAME] [--focus]
+  dispatch.py <repo_dir> <name> <task> --worktree <branch> [--base REF] [...]
+
+Without --worktree the agent works in <repo_dir> and may read its parent folder (a folder of repos).
+With --worktree the agent works in a git worktree of <repo_dir> on <branch> and may read only the main checkout.
 """
 import argparse
 import json
@@ -17,6 +22,13 @@ def herdr(*args):
     return json.loads(out.stdout)
 
 
+def git(repo, *args):
+    out = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, timeout=60)
+    if out.returncode != 0:
+        sys.exit(f"git {' '.join(args[:2])} failed: {out.stderr.strip() or out.stdout.strip()}")
+    return out.stdout.strip()
+
+
 def find_lead(terminal):
     for space in herdr("ls").get("spaces", []):
         for tab in space.get("tabs", []):
@@ -26,6 +38,34 @@ def find_lead(terminal):
     return None, None
 
 
+def worktrees_root():
+    try:
+        with open(os.path.expanduser("~/.config/herdr-app/settings.json"), encoding="utf-8") as f:
+            d = json.load(f)
+        configured = (d.get("worktrees") or {}).get("directory")
+    except (OSError, ValueError):
+        configured = None
+    return os.path.expanduser(configured or "~/.herdr/worktrees")
+
+
+def ensure_worktree(main, branch, base):
+    for block in git(main, "worktree", "list", "--porcelain").split("\n\n"):
+        lines = dict(line.split(" ", 1) for line in block.splitlines() if " " in line)
+        if lines.get("branch") == f"refs/heads/{branch}":
+            return lines["worktree"], False
+    path = os.path.join(worktrees_root(), os.path.basename(main), branch.replace("/", "-"))
+    if os.path.exists(path):
+        sys.exit(f"{path} exists but is not a worktree of branch {branch}; pick another branch or remove it")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    exists = subprocess.run(["git", "-C", main, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}"],
+                            capture_output=True).returncode == 0
+    if exists:
+        git(main, "worktree", "add", path, branch)
+    else:
+        git(main, "worktree", "add", "-b", branch, path, base)
+    return path, True
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("repo_dir")
@@ -33,6 +73,8 @@ def main():
     p.add_argument("task")
     p.add_argument("--place", choices=["tab", "right", "down"], default="tab")
     p.add_argument("--template", default="worker")
+    p.add_argument("--worktree", metavar="BRANCH")
+    p.add_argument("--base", default="HEAD", help="where a new worktree branch starts (default: HEAD of repo_dir)")
     p.add_argument("--focus", action="store_true")
     a = p.parse_args()
 
@@ -54,15 +96,27 @@ def main():
     if body.startswith("---"):
         body = body.split("---", 2)[2]
     rules = " ".join(line.strip() for line in body.strip().splitlines() if line.strip())
-    task = f"{rules} Terminal điều phối: {lead}. Việc của bạn: {a.task}"
-    workspace = os.path.dirname(repo)
+
+    created = False
+    if a.worktree:
+        main_repo = git(repo, "rev-parse", "--show-toplevel")
+        folder, created = ensure_worktree(main_repo, a.worktree, a.base)
+        readable = main_repo
+        where = (f"Bạn làm trong git worktree {folder}, branch {a.worktree}. "
+                 f"Repo chính ở {main_repo}: chỉ đọc (TASK.md, tài liệu), không sửa, không đổi branch của nó. "
+                 f"Các bước khác có thể đang chạy song song ở worktree khác.")
+    else:
+        folder = repo
+        readable = os.path.dirname(repo)
+        where = f"Bạn làm trong repo {folder}. Thư mục {readable} chứa các repo khác: chỉ đọc."
+    task = f"{rules} {where} Terminal điều phối: {lead}. Việc của bạn: {a.task}"
 
     if a.place == "tab":
         req = {
             "name": a.name,
             "space": space,
-            "folder": repo,
-            "argv": ["claude", "--add-dir", workspace, "--"],
+            "folder": folder,
+            "argv": ["claude", "--add-dir", readable, "--"],
             "task": task,
             "focus": a.focus,
         }
@@ -73,11 +127,12 @@ def main():
         req = {
             "direction": a.place,
             "pane": lead_pane,
-            "argv": ["sh", "-c", 'cd "$1" && exec claude --add-dir "$2" -- "$3"', "sh", repo, workspace, task],
+            "argv": ["sh", "-c", 'cd "$1" && exec claude --add-dir "$2" -- "$3"', "sh", folder, readable, task],
         }
         res = herdr("do", "pane.split", json.dumps(req, ensure_ascii=False))
     print(json.dumps({"place": a.place, "terminal": res.get("terminal"), "pane": res.get("pane"),
-                      "tab": res.get("tab"), "repo": repo, "name": a.name}, ensure_ascii=False))
+                      "tab": res.get("tab"), "folder": folder, "worktree": bool(a.worktree),
+                      "new_worktree": created, "name": a.name}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

@@ -48,7 +48,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/go-service` | Go service conventions with a reference service |
 | `skills/sdk-wrapper` | conventions for an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
-| `skills/herdr-dispatch` | give each step of a multi-repo plan to its own agent in a Herdr tab or pane |
+| `skills/herdr-dispatch` | give each step of a plan to its own agent in a Herdr tab or pane: one agent per repo, or one git worktree per step in a single repo |
 | `herdr/templates` | `worker.md` and `reviewer.md`: rules `herdr-dispatch` copies into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
@@ -61,7 +61,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 
 ## Herdr
 
-Set `worktrees.directory` in `~/.config/herdr-app/settings.json` so agents work in worktrees outside the repo. Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
+In a single repo, `herdr-dispatch` gives each independent step its own worktree (`dispatch.py --worktree <branch>`); the lead merges the branches in plan order and removes a worktree only after its branch is merged. Worktrees go to `worktrees.directory` in `~/.config/herdr-app/settings.json` (default `~/.herdr/worktrees`). Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
 
 ## Rules for this repo
 

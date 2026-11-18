@@ -48,6 +48,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/go-service` | Go service conventions with a reference service |
 | `skills/sdk-wrapper` | conventions for an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
+| `skills/lead` | `/lead` in any Herdr tab: the session becomes the project's coordinator; each plain request is answered, done in place, or delegated through `herdr-dispatch`, with `LEAD.md` as its memory |
 | `skills/herdr-dispatch` | give each step of a plan to its own agent in a Herdr tab or pane: one agent per repo, or one git worktree per step in a single repo |
 | `herdr/templates` | `worker.md` and `reviewer.md`: rules `herdr-dispatch` copies into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |

@@ -79,7 +79,7 @@ Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn
 
 Chuyển sang Herdr: session chạy ngoài Herdr (`HC_TERMINAL_ID` trống) và người dùng đã đồng ý, thì đề nghị chạy phần code trong Herdr để họ thấy các agent. Họ đồng ý thì:
 1. Ghi vào "Quyết định và bằng chứng" mọi quyết định đã chốt trong cuộc trò chuyện mà TASK.md chưa có (lựa chọn lúc brainstorm, có commit hay không). Lead trong Herdr chỉ đọc TASK.md, không thấy cuộc trò chuyện này.
-2. Đặt Phase là `code`, rồi chạy `herdr-task <slug> --root <gốc dự án>`. Lệnh mở một space trong Herdr với lead chạy `/work <slug>`.
+2. Đặt Phase là `code`, rồi chạy `herdr-task <slug> --root <gốc dự án>`. Lệnh mở một space trong Herdr với lead chạy `/work <slug>`. Thư mục chưa từng chạy Claude thì lead dừng ở câu hỏi có tin thư mục không, lựa chọn mặc định là thoát: nói người dùng mở space `<slug>` trong Herdr và chọn "Yes, I trust this folder". Bạn không tự trả lời câu đó.
 3. Từ đó chỉ lead ghi TASK.md. Session này dừng ghi, chỉ đọc TASK.md để trả lời người dùng. Hai nơi cùng ghi thì đè nhau.
 
 ## 4. Code

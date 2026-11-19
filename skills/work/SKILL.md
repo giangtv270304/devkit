@@ -126,7 +126,8 @@ Commit theo ~/.claude/rules/commits.md, mô tả PR theo ~/.claude/rules/pull-re
 - thêm một dòng vào CLAUDE.md của repo cho lỗi đã xảy ra hai lần, hoặc cho sự thật khó đoán vừa phát hiện,
 - cập nhật tài liệu hợp đồng, tài liệu kiến trúc, tài liệu công khai và quy ước (đường dẫn trong project.md),
 - viết một note cho luồng khó đã phải lần theo, và chạy `python3 ~/.claude/skills/refresh-context/context_state.py record <repo>` cho repo có CLAUDE.md vừa cập nhật,
-- đánh dấu ADR là đã chấp nhận.
+- đánh dấu ADR là đã chấp nhận,
+- chạy `/retro <slug>` khi trong task người dùng phải sửa agent, hook phải chặn, hoặc có `NEEDS_REPLAN`, `BLOCKED`, `> NOTE:`.
 
 Đặt Phase thành `done`.
 

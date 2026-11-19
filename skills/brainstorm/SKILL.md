@@ -59,4 +59,4 @@ Giả định phải đúng: ...
 Xem lại khi: <điều kiện cụ thể làm quyết định này hết đúng>
 ```
 
-Bước tiếp theo, đề xuất trong một dòng: `/research` nếu còn giả định chưa kiểm tra; `/work <slug>` nếu đã đủ rõ để làm.
+Bước tiếp theo, đề xuất trong một dòng: `/research` nếu còn giả định chưa kiểm tra; `/work <slug>` nếu đã đủ rõ để làm; `/retro` nếu trong phiên người dùng đã phải sửa cách bạn làm.

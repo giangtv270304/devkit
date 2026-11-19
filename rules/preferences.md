@@ -12,6 +12,7 @@
 ## Commit, push and merge
 - Public repo owned by the personal account `giangtv270304`: commit, push and merge into the default branch without asking, because the user owns it alone and wants finished work landed. Report the commit sha and pushed branch afterwards.
 - Every other repo (private ones, including private `giangtv270304` repos, and any repo owned by an organization): never commit to the default branch, push, open a PR or merge until the user says so in this session.
+- Exception: in the devkit repo (the one `~/.claude/devkit` links to), the `retro` skill may create, commit and push branches named `retro/*` without asking, because main stays untouched until the user reviews. Merging a `retro/*` branch into main still needs the user's "ok" in this session.
 - Decide from `gh repo view <origin> --json owner,visibility` right before the push, not from memory, because visibility can change.
 - Even in a public personal repo, ask before a force push, a history rewrite of the default branch, or deleting a branch, because they lose work. Since a push there publishes, check the diff for secrets, `.env` content and company or client names first, and stop and ask if any appear.
 

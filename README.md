@@ -48,6 +48,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/review-pr` | review someone else's PR in a separate worktree |
 | `skills/research` | sourced answers at three depths, any domain |
 | `skills/brainstorm` | from a vague idea to a decision record |
+| `skills/retro` | `/retro`: collects friction signals from transcripts and TASK.md, the `improver` agent traces them to rule, skill, agent or hook text, fixes land on a pushed `retro/<date>` branch of devkit and merge only on the user's "ok" |
 | **Conventions** (loaded before writing code) | |
 | `skills/go-service` | Go service conventions with a reference service |
 | `skills/sdk-wrapper` | an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
@@ -62,7 +63,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (reviews the diff itself by the rules in `agents/reviewer.md` or `agents/security-reviewer.md`), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | **Shared** | |
-| `agents/` | architect, tester, developer, reviewer, security-reviewer |
+| `agents/` | architect, tester, developer, reviewer, security-reviewer, improver |
 | `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, fixing an instruction after a correction, opening agents inside Herdr |
 | `output-styles/` | `engineer-brief` and `plain-words` reply styles |
 | `templates/project.md`, `templates/adr.md` | starting points for a project's `.claude/project.md` and for an ADR when the project has no template |

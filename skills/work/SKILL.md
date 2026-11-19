@@ -77,7 +77,9 @@ Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn
 
 **ĐIỂM DỪNG 1**: Phase `plan`. Tóm tắt ghi `CẦN BẠN: đọc Mục tiêu và Kế hoạch; sửa bằng > NOTE: hoặc nói đồng ý`. Đưa link TASK.md. Hỏi luôn agent có được commit trên máy hay không. Mặc định là không commit.
 
-Chuyển sang Herdr: session chạy ngoài Herdr (`HC_TERMINAL_ID` trống) và người dùng đã đồng ý, thì đề nghị chạy phần code trong Herdr để họ thấy các agent. Họ đồng ý thì:
+Session chạy ngoài Herdr (`HC_TERMINAL_ID` trống) mà `command -v herdr-task` có kết quả: câu hỏi duyệt ở điểm dừng này gộp luôn chỗ chạy code. Hai lựa chọn là "Đồng ý, chạy trong Herdr" (đề xuất) và "Đồng ý, chạy ở đây". Branch, commit và các chi tiết khác nằm trong nội dung câu hỏi, không chiếm chỗ của hai lựa chọn này. Lý do: một lời "đồng ý" không nói chỗ chạy sẽ được hiểu là bắt đầu code ngay tại chỗ, và đề nghị chuyển hỏi sau đó bị bỏ qua.
+
+Chuyển sang Herdr: người dùng chọn "chạy trong Herdr" thì, trước khi tạo branch hay sửa code:
 1. Ghi vào "Quyết định và bằng chứng" mọi quyết định đã chốt trong cuộc trò chuyện mà TASK.md chưa có (lựa chọn lúc brainstorm, có commit hay không). Lead trong Herdr chỉ đọc TASK.md, không thấy cuộc trò chuyện này.
 2. Đặt Phase là `code`, rồi chạy `herdr-task <slug> --root <gốc dự án>`. Lệnh mở một space trong Herdr với lead chạy `/work <slug>`. Thư mục chưa từng chạy Claude thì lead dừng ở câu hỏi có tin thư mục không, lựa chọn mặc định là thoát: nói người dùng mở space `<slug>` trong Herdr và chọn "Yes, I trust this folder". Bạn không tự trả lời câu đó.
 3. Từ đó chỉ lead ghi TASK.md. Session này dừng ghi, chỉ đọc TASK.md để trả lời người dùng. Hai nơi cùng ghi thì đè nhau.

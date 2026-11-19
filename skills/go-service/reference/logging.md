@@ -64,19 +64,19 @@ Dùng đúng tên này trong mọi repo, để một câu lọc trên Loki chạ
 |---|---|
 | `request_id` | middleware `ContextLogger` gắn (xem mục Cách viết). Phải đi theo vào goroutine và job nền |
 | `tenant_id` | id số của tenant |
-| `user_uuid` | UUID công khai của user. Không dùng `user_id` cho giá trị này |
-| `user_db_id` | id số của user trong DB, khi cần |
+| `user_id` | UUID công khai của user, là id mà API và các service khác dùng |
+| `user_db_id` | id số của user trong DB, khi cần. Không ghi id số dưới khóa `user_id` |
 | `provider`, `op` | tên provider viết thường; tên thao tác, ví dụ `submit_kyc` |
 | `order_id`, `task_id`, `session_id` | id của đối tượng |
 | `duration_ms` | số nguyên (`.Int64("duration_ms", d.Milliseconds())`), không dùng chuỗi như `"1.2s"` |
 | `reason` | lý do của một quyết định, viết ngắn bằng snake_case: `missing_fields`, `provider_disabled` |
 
-Repo đang dùng khóa camelCase (xem "Go notes" trong `.claude/project.md`) thì giữ camelCase, nhưng dùng cùng nghĩa: `userUuid`, `durationMs`.
+Repo đang dùng khóa camelCase (xem "Go notes" trong `.claude/project.md`) thì giữ camelCase, nhưng dùng cùng nghĩa: `userId`, `durationMs`.
 
 ## Log trong goroutine và job nền
 - Truyền logger đã có `request_id` vào, hoặc lấy từ context bằng `zerolog.Ctx(ctx)`. Không dùng logger gốc của struct, vì logger đó không có `request_id`.
   ```go
-  log := zerolog.Ctx(reqCtx).With().Str("user_uuid", userUUID).Logger()
+  log := zerolog.Ctx(reqCtx).With().Str("user_id", userUUID).Logger()
   bgCtx := log.WithContext(context.WithoutCancel(reqCtx))
   go h.service.notifier.Send(bgCtx, userUUID)
   // bên trong: zerolog.Ctx(ctx).Info().Msg("notification sent")
@@ -88,11 +88,11 @@ Repo đang dùng khóa camelCase (xem "Go notes" trong `.claude/project.md`) th�
 - Label chỉ gồm `service` và `level`. Không đưa id vào label: mỗi giá trị label mới tạo ra một luồng mới, và Loki chậm dần.
 - Lọc theo id bằng JSON:
   - `{service="<svc>", level="error"} | json`
-  - `{service="<svc>"} | json | user_uuid="<uuid>"`
+  - `{service="<svc>"} | json | user_id="<uuid>"`
   - `{service=~".+"} | json | request_id="<id>"`: lần theo một request qua nhiều service.
 
 ## Không bao giờ log
 - Secret, API key đầy đủ, token, header `Authorization`, mật khẩu, số thẻ.
-- Dữ liệu cá nhân và dữ liệu KYC: họ tên, email, phone, ngày sinh, số giấy tờ, địa chỉ, ảnh. Định danh user bằng `user_uuid`.
+- Dữ liệu cá nhân và dữ liệu KYC: họ tên, email, phone, ngày sinh, số giấy tờ, địa chỉ, ảnh. Định danh user bằng `user_id`.
 - Body request hoặc response có các thứ trên.
 - Chuỗi lỗi hoặc body lỗi của bên ngoài khi chưa làm sạch. Chúng có thể chứa dữ liệu user. Chỉ log mã lỗi, `http_status` và thông điệp đã cắt bỏ dữ liệu.

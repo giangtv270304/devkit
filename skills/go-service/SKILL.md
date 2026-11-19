@@ -103,7 +103,7 @@ Tenant và user: với API mà tenant gọi qua gateway, lấy tenant từ middl
 
 ## 5. Log
 
-Dùng `h.log` trong handler, `zerolog.Logger` qua constructor ngoài handler. Khóa log snake_case, `Msg` chữ thường ngắn. Không bao giờ log secret, API key, token, header `Authorization`, số thẻ, dữ liệu KYC. Một dòng hay nhiều dòng, thứ tự field, ví dụ: `reference/logging.md`.
+Dùng `h.log` trong handler, `zerolog.Logger` qua constructor ngoài handler. Khóa log snake_case, `Msg` chữ thường ngắn. Log lỗi một lần ở tầng xử lý nó, log mỗi lần gọi bên ngoài và mỗi quyết định làm đổi kết quả, dùng khóa chung (`request_id`, `tenant_id`, `user_uuid`, `duration_ms`...), mang `request_id` vào goroutine và job nền. Không bao giờ log secret, API key, token, header `Authorization`, số thẻ, dữ liệu cá nhân hay KYC. Log ở đâu, chọn level, bảng khóa, cách tra trên Loki: `reference/logging.md`.
 
 ## 6. Repo và SQL
 

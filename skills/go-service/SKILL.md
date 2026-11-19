@@ -97,7 +97,7 @@ Tenant và user: với API mà tenant gọi qua gateway, lấy tenant từ middl
 - Bọc lỗi: `fmt.Errorf("failed to <động từ> <vật>: %w", err)`. Ví dụ `"failed to create widget: %w"`. Luôn dùng `%w`. So sánh bằng `errors.Is` / `errors.As`.
 - Trong handler:
   - lỗi do người gọi: `echo.NewHTTPError(http.StatusBadRequest|NotFound|Conflict|Forbidden, "thông điệp chữ thường")`,
-  - lỗi của mình (5xx): `httpserver.InternalError(err, "failed to create widget")`. **Luôn truyền thông điệp thứ hai.** Nếu thiếu, gframework trả `err.Error()` cho người gọi và làm lộ chi tiết bên trong. gframework đã tự log lỗi gốc, nên không log lại lỗi đó trong handler.
+  - lỗi của mình (5xx): `httpserver.InternalError(err, "failed to create widget")`. **Luôn truyền thông điệp thứ hai.** Nếu thiếu, gframework trả `err.Error()` cho người gọi và làm lộ chi tiết bên trong. gframework không log lỗi mà handler trả về (`LogErrors` không được bật), nên handler log lỗi gốc đúng một lần, bằng `h.log.Error().Err(err)`, ngay trước khi trả lỗi.
   - không bao giờ đưa `err.Error()` vào thông điệp trả về.
 - Không `panic` trong code xử lý request. Không bỏ qua lỗi bằng `_ =`, trừ khi có comment giải thích vì sao.
 

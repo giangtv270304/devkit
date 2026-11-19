@@ -3,7 +3,19 @@
 Mục tiêu: tra được lỗi trên Grafana/Loki mà không cần đọc code. Log chi tiết nghĩa là mỗi dòng có đủ field để lọc, không phải nhiều dòng. Log thừa làm Loki chậm và làm dòng cần tìm bị chìm.
 
 ## Cách viết
-- Dùng `h.log` (logger mà `ExecuteStandardized` truyền vào, đã có `handler` và `request_id`). Ngoài handler, nhận `zerolog.Logger` qua constructor. Không dùng logger global `log.Info()` trong code nghiệp vụ.
+- Dùng `h.log` (logger mà `ExecuteStandardized` truyền vào, có `handler`). Ngoài handler, nhận `zerolog.Logger` qua constructor. Không dùng logger global `log.Info()` trong code nghiệp vụ.
+- gframework (đã kiểm tra tới v1.8.0) chỉ gắn `request_id` vào dòng "Request started". `h.log` lấy logger từ context của request, nên chỉ có `request_id` khi service có middleware gắn sẵn logger đó vào context, đặt ngay sau `middleware.RequestID`. Thiếu middleware này thì log của handler không lọc được theo `request_id`. Trước khi viết log, kiểm tra repo đã có middleware đó chưa.
+  ```go
+  func ContextLogger(base zerolog.Logger) echo.MiddlewareFunc {
+  	return func(next echo.HandlerFunc) echo.HandlerFunc {
+  		return func(c *echo.Context) error {
+  			l := base.With().Str("request_id", gfmiddleware.GetRequestID(c)).Logger()
+  			c.SetRequest(c.Request().WithContext(l.WithContext(c.Request().Context())))
+  			return next(c)
+  		}
+  	}
+  }
+  ```
 - Log là JSON một dòng ra stdout. Không dùng `ConsoleWriter` ở môi trường chạy thật, vì bộ thu log đọc `level` từ JSON.
 - Khóa log viết snake_case: `.Str("widget_id", id).Int("tenant_id", tenantID)`.
 - `Msg` viết chữ thường, ngắn, thì quá khứ cho sự kiện: `"widget created"`, `"cache get failed"`. Gợi ý cho người vận hành đặt trong `Msg`, không đặt trong comment.
@@ -35,7 +47,9 @@ Không log:
 - Mỗi lần đọc thành công.
 - Từng phần tử trong vòng lặp ở level Info.
 - Trong hàm repo. Repo bọc lỗi (`fmt.Errorf("get user: %w", err)`) rồi trả lên.
-- Cùng một lỗi ở nhiều tầng. Handler trả `httpserver.InternalError` thì gframework đã log lỗi gốc rồi.
+- Cùng một lỗi ở nhiều tầng.
+
+Lỗi mà handler trả về: `httpserver.New` không bật `LogErrors` của error handler (đã kiểm tra tới v1.8.0), nên gframework **không** log lỗi đó. Handler phải tự log lỗi 5xx đúng một lần, ngay trước khi trả `httpserver.InternalError`. Lỗi 4xx do input của người gọi thì ghi Warn, hoặc không ghi.
 
 ## Chọn level
 - **Error**: request thất bại vì lỗi của mình, hoặc cần người xử lý. Mỗi dòng Error phải đáng được cảnh báo.
@@ -48,7 +62,7 @@ Dùng đúng tên này trong mọi repo, để một câu lọc trên Loki chạ
 
 | Khóa | Nghĩa |
 |---|---|
-| `request_id` | gframework tự gắn. Phải đi theo vào goroutine và job nền |
+| `request_id` | middleware `ContextLogger` gắn (xem mục Cách viết). Phải đi theo vào goroutine và job nền |
 | `tenant_id` | id số của tenant |
 | `user_uuid` | UUID công khai của user. Không dùng `user_id` cho giá trị này |
 | `user_db_id` | id số của user trong DB, khi cần |

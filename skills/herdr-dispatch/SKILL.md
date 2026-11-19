@@ -48,7 +48,13 @@ Kế hoạch mà hai bước song song cùng sửa một file thì đừng chia 
 4. Ghi vào TASK.md: bước nào giao cho terminal nào, branch nào, lúc nào.
 5. Chờ báo cáo bằng `hc wait --children any`. Không dùng `sleep`. Agent báo về bằng `hc send`, tin nhắn hiện trong ô nhập của bạn.
 6. Agent báo về bằng một trong bốn trạng thái của developer (`DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN`, `BLOCKED`) và xử lý theo bước 4 của `/work`. `NEEDS_REPLAN` thì dừng các bước phụ thuộc, sửa Kế hoạch, và hỏi người dùng nếu đổi tiêu chí, hợp đồng hoặc file thân. Khi agent báo xong, đừng tin ngay tin nhắn. Kiểm tra: commit có thật và mới hơn lúc giao việc (`git -C <thư mục của agent> log -1 --format='%h %ci'`), đúng branch. Task không commit thì chạy `git -C <thư mục của agent> status --short`: file đã đổi phải khớp danh sách agent báo và nằm trong bước đó của Kế hoạch. Rồi tự ghi một dòng vào TASK.md: branch, commit, kết quả test, còn thiếu gì. Rồi giao các bước đang chờ bước đó.
-7. Khi agent báo kẹt: trả lời bằng `hc send <terminal> "..."` nếu bạn tự quyết được trong phạm vi kế hoạch. Ngoài phạm vi thì hỏi người dùng.
+7. Khi agent hỏi hoặc báo kẹt: trả lời bằng `hc send <terminal> "..."` nếu TASK.md, luật của người dùng hoặc "Đồng ý sẵn" đã có câu trả lời, và nói đã dựa vào đâu. Còn lại thì hỏi người dùng, gom các câu của mọi agent vào một tin nhắn, tối đa 5 câu, theo mẫu:
+   ```
+   1. [user-svc] Chống trùng theo tx_hash hay (tx_hash, ví)? Đề xuất: (tx_hash, ví), vì một giao dịch có thể chuyển tới hai ví.
+   2. [gateway] Route mới có qua rate limit không? Đề xuất: không, giống các webhook khác.
+   Gõ "ok" để theo mọi đề xuất, hoặc "2: có" để đổi từng câu.
+   ```
+   Mỗi câu một dòng, có tên agent, có đề xuất và lý do ngắn, vì người dùng không đọc từng pane. Người dùng trả lời thì chuyển cho đúng agent và ghi quyết định vào TASK.md. Báo cáo có `người dùng quyết: ...` thì cũng chép vào TASK.md.
 8. Hết bước:
    - Nhiều repo: tóm tắt trong TASK.md branch và commit của từng repo.
    - Worktree: gộp các branch vào branch của task theo thứ tự trong kế hoạch (`git merge --no-ff <branch>` trong repo chính). Có xung đột thì dừng và hỏi người dùng. Gộp xong mới dọn: hỏi người dùng rồi `git worktree remove <thư mục>` và `git branch -d <branch>`. Không dọn worktree của branch chưa gộp.

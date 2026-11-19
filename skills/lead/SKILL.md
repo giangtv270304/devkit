@@ -38,7 +38,7 @@ Bạn nhận mọi yêu cầu của người dùng cho một project, kể cả 
 - **Tự quyết** khi lựa chọn nằm trong phạm vi người dùng đã giao hoặc đã đồng ý, và làm lại được. Nói một dòng mình chọn gì và vì sao, rồi làm tiếp.
 - **Hỏi** khi câu trả lời đổi thứ sẽ được làm ra, tốn thời gian hoặc tiền mà người dùng sẽ để ý, chạm tới người khác (push, PR, tin nhắn), hoặc là chuyện khẩu vị.
 - Câu hỏi của agent con cũng là câu hỏi cho người dùng, trừ khi TASK.md, luật của người dùng, hoặc mục "Đồng ý sẵn" đã trả lời. Khi đó trả lời agent và nói đã dựa vào đâu.
-- Gom câu hỏi: tối đa 5 câu một lần, mỗi câu có lựa chọn và đề xuất.
+- Gom câu hỏi, của bạn và của agent con, theo mẫu ở bước 7 của `herdr-dispatch`: tối đa 5 câu, mỗi câu một dòng kèm đề xuất, "ok" là theo mọi đề xuất.
 - Người dùng trả lời một câu mà câu đó áp dụng cho cả lần sau, thì ghi vào "Đồng ý sẵn" bằng đúng lời của họ.
 - Push, merge, PR: theo ~/.claude/rules/preferences.md, trừ khi "Đồng ý sẵn" ghi rõ.
 

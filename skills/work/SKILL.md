@@ -77,6 +77,11 @@ Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn
 
 **ĐIỂM DỪNG 1**: Phase `plan`. Tóm tắt ghi `CẦN BẠN: đọc Mục tiêu và Kế hoạch; sửa bằng > NOTE: hoặc nói đồng ý`. Đưa link TASK.md. Hỏi luôn agent có được commit trên máy hay không. Mặc định là không commit.
 
+Chuyển sang Herdr: session chạy ngoài Herdr (`HC_TERMINAL_ID` trống) và người dùng đã đồng ý, thì đề nghị chạy phần code trong Herdr để họ thấy các agent. Họ đồng ý thì:
+1. Ghi vào "Quyết định và bằng chứng" mọi quyết định đã chốt trong cuộc trò chuyện mà TASK.md chưa có (lựa chọn lúc brainstorm, có commit hay không). Lead trong Herdr chỉ đọc TASK.md, không thấy cuộc trò chuyện này.
+2. Đặt Phase là `code`, rồi chạy `herdr-task <slug> --root <gốc dự án>`. Lệnh mở một space trong Herdr với lead chạy `/work <slug>`.
+3. Từ đó chỉ lead ghi TASK.md. Session này dừng ghi, chỉ đọc TASK.md để trả lời người dùng. Hai nơi cùng ghi thì đè nhau.
+
 ## 4. Code
 Làm từng mục trong Kế hoạch, theo thứ tự:
 1. Trong repo của bước đó, chạy `git status`. Nếu có thay đổi chưa commit không thuộc task này, dừng lại và hỏi. Tạo hoặc chuyển sang branch của task. Ghi commit gốc (`git rev-parse --short HEAD`) vào "Quyết định và bằng chứng": diff để review lấy từ commit này.

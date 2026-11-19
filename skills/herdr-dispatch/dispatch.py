@@ -35,19 +35,34 @@ def find_lead(terminal):
             terminals = tab.get("terminals", [])
             for t in terminals:
                 if t.get("terminal") == terminal:
-                    others = [o.get("pane") for o in terminals if o.get("terminal") != terminal and o.get("pane")]
-                    return space["id"], t.get("pane"), others
+                    others = [o for o in terminals if o.get("terminal") != terminal and o.get("pane")]
+                    others.sort(key=lambda o: opened_order(o.get("terminal")))
+                    return space["id"], t.get("pane"), [o["pane"] for o in others]
     return None, None, []
 
 
+def opened_order(terminal):
+    # herdr-app ls lists panes by layout; terminal ids (t39, t3b, ...) grow in the order they were opened.
+    try:
+        return int((terminal or "")[1:], 36)
+    except ValueError:
+        return 0
+
+
 def auto_place(lead_pane, others):
-    # Herdr halves the pane it splits, so this order ends with four equal columns.
-    if not others:
+    # Herdr halves the pane it splits. Agents 1-3 make four equal columns (lead, 3, 1, 2); agents 4-6 split
+    # those worker columns in opening order, agent 7 splits the lead's column last, then tabs.
+    n = len(others)
+    if n == 0:
         return "right", lead_pane
-    if len(others) == 1:
+    if n == 1:
         return "right", others[0]
-    if len(others) == 2:
+    if n == 2:
         return "right", lead_pane
+    if n <= 5:
+        return "down", others[n - 3]
+    if n == 6:
+        return "down", lead_pane
     return "tab", None
 
 
@@ -93,7 +108,7 @@ def main():
     p.add_argument("name")
     p.add_argument("task")
     p.add_argument("--place", choices=["auto", "tab", "right", "down"], default="auto",
-                   help="auto: up to three agents as columns beside the lead, then tabs")
+                   help="auto: four columns, then each column split in two (eight panes), then tabs")
     p.add_argument("--template", default="worker")
     p.add_argument("--worktree", metavar="BRANCH")
     p.add_argument("--base", default="HEAD", help="where a new worktree branch starts (default: HEAD of repo_dir)")

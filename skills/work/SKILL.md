@@ -73,7 +73,7 @@ Tìm gốc lỗi trước khi viết test. Nếu chưa biết gốc lỗi, test 
 
 ## 3. Kế hoạch
 
-Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn TASK.md; bug: tự viết kế hoạch từ "Nguyên nhân bug". Mỗi bước ghi repo, kết quả, tiêu chí, agent, file thân/lá. Chỉ ghi đường dẫn đã mở và đọc. Luôn có dòng "Cách tắt khi có lỗi". High-risk: thêm đoạn code đề xuất cho file thân. High-risk và cross-repo: giao `reviewer` rà kế hoạch trước khi dừng. Chi tiết: `reference/planning.md`.
+Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn TASK.md; bug: tự viết kế hoạch từ "Nguyên nhân bug". Mỗi bước ghi repo, kết quả, tiêu chí, agent, file thân/lá. Chỉ ghi đường dẫn đã mở và đọc. Luôn có dòng "Cách tắt khi có lỗi". High-risk: thêm đoạn code đề xuất cho file thân. High-risk và cross-repo: giao `reviewer` rà kế hoạch trước khi dừng (trong Herdr là một pane `--template reviewer`, câu giao việc nói rà Kế hoạch trong TASK.md). Chi tiết: `reference/planning.md`.
 
 **ĐIỂM DỪNG 1**: Phase `plan`. Tóm tắt ghi `CẦN BẠN: đọc Mục tiêu và Kế hoạch; sửa bằng > NOTE: hoặc nói đồng ý`. Đưa link TASK.md. Hỏi luôn agent có được commit trên máy hay không. Mặc định là không commit.
 
@@ -108,7 +108,7 @@ Bạn tự kiểm tra, không tin báo cáo của agent: chạy bộ kiểm tra 
 ## 6. Review
 Giao cho `reviewer`: đường dẫn TASK.md, các repo, branch và commit gốc. Với task high-risk, giao thêm cho `security-reviewer` cùng lúc. Không đưa cho reviewer báo cáo của developer hay tóm tắt của bạn.
 
-Trong Herdr: mỗi repo một pane review, `dispatch.py <repo> review-<slug> "<TASK.md>, branch <b>, commit gốc <sha>" --template reviewer`. Pane đó tự giao cho `reviewer` và `security-reviewer`, rồi báo về bằng `hc send`. Bạn chờ bằng `hc wait --children any` chạy nền, nên vẫn nhận tin của người dùng trong lúc chờ.
+Trong Herdr: mỗi repo một pane review, `dispatch.py <repo> review-<slug> "<TASK.md>, branch <b>, commit gốc <sha>" --template reviewer`. Task high-risk mở thêm pane `security-<slug>` cùng template, câu giao việc có chữ `security`. Mỗi pane tự review theo luật trong `~/.claude/agents/`, không gọi subagent, rồi báo về bằng `hc send`. Bạn chờ bằng `hc wait --children any` chạy nền, nên vẫn nhận tin của người dùng trong lúc chờ.
 
 Trước khi chấp nhận một vấn đề blocker hoặc major, tự mở đúng `file:dòng` và kiểm tra nó có thật. Bỏ vấn đề không đúng với code, và ghi một dòng lý do bỏ.
 

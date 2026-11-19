@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse hook (Agent|Task): inside Herdr (HC_TERMINAL_ID set), deny subagents whose work the user wants to
-watch, so it runs in a visible herdr-dispatch pane instead. A reviewer pane (DEVKIT_ROLE=reviewer) may still call
-the review agents. Anything it cannot decide, it allows."""
+watch, so it runs in a visible herdr-dispatch pane instead. Anything it cannot decide, it allows."""
 import json
 import os
 import sys
@@ -17,7 +16,9 @@ def reason(kind):
                 "(tester và developer của một bước gộp vào một pane).")
     return (f"Đang chạy trong Herdr: không chạy {kind} bằng subagent. Mở pane review: "
             "python3 ~/.claude/skills/herdr-dispatch/dispatch.py <repo> review-<slug> "
-            "\"<TASK.md>, branch <b>, commit gốc <sha>\" --template reviewer, rồi chờ bằng hc wait --children any.")
+            "\"<TASK.md>, branch <b>, commit gốc <sha>\" --template reviewer (security review: một pane security-<slug> "
+            "với chữ security trong câu giao việc), rồi chờ bằng hc wait --children any. Trong pane review: tự review "
+            "theo ~/.claude/agents/<agent>.md, không gọi subagent.")
 
 
 def main():
@@ -25,8 +26,6 @@ def main():
         return
     data = json.load(sys.stdin)
     kind = (data.get("tool_input") or {}).get("subagent_type")
-    if kind in REVIEW and os.environ.get("DEVKIT_ROLE") == "reviewer":
-        return
     if kind not in CODE | REVIEW:
         return
     print(json.dumps({"hookSpecificOutput": {

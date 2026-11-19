@@ -59,7 +59,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | **Herdr** (see the Herdr section) | |
 | `skills/herdr-dispatch` | open an agent as a pane or tab: a one-off with `helper`, or plan steps with `worker` (one agent per repo, or one git worktree per step) |
-| `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (hands the diff to the `reviewer` agent), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
+| `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (reviews the diff itself by the rules in `agents/reviewer.md` or `agents/security-reviewer.md`), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | **Shared** | |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer |
@@ -71,7 +71,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
 | `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list |
-| `hooks/herdr_agent_gate.py` | inside Herdr, denies developer, tester, reviewer and security-reviewer subagents so the work runs in a visible pane; a reviewer pane (`DEVKIT_ROLE=reviewer`) may still call the review agents |
+| `hooks/herdr_agent_gate.py` | inside Herdr, denies developer, tester, reviewer and security-reviewer subagents so the work runs in a visible pane, reviewer panes included |
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
 | `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |
@@ -83,7 +83,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 
 In a single repo, `herdr-dispatch` gives each independent step its own worktree (`dispatch.py --worktree <branch>`); the lead merges the branches in plan order and removes a worktree only after its branch is merged. Worktrees go to `worktrees.directory` in `~/.config/herdr-app/settings.json` (default `~/.herdr/worktrees`). Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
 
-Claude desktop and Herdr run the same flow. `/work` uses subagents outside Herdr and `herdr-dispatch` panes inside it (worker for code, reviewer for review; only architect and search stay subagents); either way a step is test first, edits outside the plan go through `plan_gate`, the agent reports `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN` or `BLOCKED`, and only the coordinator writes `TASK.md`. The Herdr reviewer session hands the diff to the `reviewer` agent, so review rules live only in `agents/`. A repo that another task is already using (not on its default branch, uncommitted changes, or an agent in it) always gets a worktree.
+Claude desktop and Herdr run the same flow. `/work` uses subagents outside Herdr and `herdr-dispatch` panes inside it (worker for code, reviewer for review; only architect and search stay subagents); either way a step is test first, edits outside the plan go through `plan_gate`, the agent reports `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN` or `BLOCKED`, and only the coordinator writes `TASK.md`. A Herdr reviewer pane reviews by reading `agents/reviewer.md` (or `security-reviewer.md` in a separate pane), so review rules live only in `agents/`. A repo that another task is already using (not on its default branch, uncommitted changes, or an agent in it) always gets a worktree.
 
 ## Rules for this repo
 

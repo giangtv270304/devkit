@@ -25,9 +25,9 @@ class HerdrAgentGateTest(unittest.TestCase):
     def test_security_reviewer_is_denied_in_worker_pane(self):
         self.assertIn('"deny"', self.gate("security-reviewer", role="worker"))
 
-    def test_reviewer_pane_may_call_review_agents(self):
-        self.assertEqual(self.gate("reviewer", role="reviewer"), "")
-        self.assertEqual(self.gate("security-reviewer", role="reviewer"), "")
+    def test_reviewer_pane_may_not_call_review_agents(self):
+        self.assertIn('"deny"', self.gate("reviewer", role="reviewer"))
+        self.assertIn('"deny"', self.gate("security-reviewer", role="reviewer"))
 
     def test_reviewer_pane_may_not_call_developer(self):
         self.assertIn('"deny"', self.gate("developer", role="reviewer"))

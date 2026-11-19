@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
-"""PreToolUse hook (Agent|Task): inside Herdr (HC_TERMINAL_ID set), deny code-writing subagents so the
-work runs in a visible herdr-dispatch worker pane instead. Read-only subagents pass. Anything it cannot
-decide, it allows."""
+"""PreToolUse hook (Agent|Task): inside Herdr (HC_TERMINAL_ID set), deny subagents whose work the user wants to
+watch, so it runs in a visible herdr-dispatch pane instead. A reviewer pane (DEVKIT_ROLE=reviewer) may still call
+the review agents. Anything it cannot decide, it allows."""
 import json
 import os
 import sys
 
-BLOCKED = set(filter(None, os.environ.get("HERDR_GATED_SUBAGENTS", "developer,tester").split(",")))
+CODE = {"developer", "tester"}
+REVIEW = {"reviewer", "security-reviewer"}
+
+
+def reason(kind):
+    if kind in CODE:
+        return (f"Đang chạy trong Herdr: không giao bước ghi code cho subagent {kind}. Mở pane worker: "
+                "python3 ~/.claude/skills/herdr-dispatch/dispatch.py <repo> <tên> \"<việc>\" --template worker "
+                "(tester và developer của một bước gộp vào một pane).")
+    return (f"Đang chạy trong Herdr: không chạy {kind} bằng subagent. Mở pane review: "
+            "python3 ~/.claude/skills/herdr-dispatch/dispatch.py <repo> review-<slug> "
+            "\"<TASK.md>, branch <b>, commit gốc <sha>\" --template reviewer, rồi chờ bằng hc wait --children any.")
 
 
 def main():
@@ -14,15 +25,14 @@ def main():
         return
     data = json.load(sys.stdin)
     kind = (data.get("tool_input") or {}).get("subagent_type")
-    if kind not in BLOCKED:
+    if kind in REVIEW and os.environ.get("DEVKIT_ROLE") == "reviewer":
         return
-    reason = (f"Đang chạy trong Herdr: không giao bước ghi code cho subagent {kind}. "
-              "Mở pane worker bằng skill herdr-dispatch: python3 ~/.claude/skills/herdr-dispatch/dispatch.py "
-              "<repo> <tên> \"<việc>\" --template worker (tester và developer của một bước gộp vào một pane).")
+    if kind not in CODE | REVIEW:
+        return
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": "deny",
-        "permissionDecisionReason": reason,
+        "permissionDecisionReason": reason(kind),
     }}, ensure_ascii=False))
 
 

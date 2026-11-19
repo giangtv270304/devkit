@@ -42,17 +42,17 @@ Kế hoạch mà hai bước song song cùng sửa một file thì đừng chia 
    - `--worktree <branch>`: script tạo worktree cho branch đó (hoặc dùng lại worktree đã có), bắt đầu từ HEAD của repo, đổi bằng `--base <ref>`. Đặt tên branch theo task, ví dụ `<slug>/step-2`. Thư mục worktree lấy từ `worktrees.directory` trong `~/.config/herdr-app/settings.json`, mặc định `~/.herdr/worktrees`.
    - Không có `--worktree`, agent được đọc thư mục cha của repo (các repo khác). Có `--worktree`, agent chỉ được đọc repo chính.
    - Mặc định `--place auto`: tối đa 3 agent mở thành cột dọc cạnh bạn (cuối cùng là 4 cột bằng nhau), từ agent thứ 4 mở tab mới. Người dùng muốn thấy bạn và agent con cùng lúc, nhưng pane quá nhỏ thì không đọc được. Người dùng nói "mở tab" thì dùng `--place tab`.
-   - Câu giao việc: một hai câu, gồm đường dẫn tuyệt đối tới TASK.md, số bước, và branch chưa merge của phần khác nếu bước này cần.
+   - Câu giao việc: một hai câu, gồm đường dẫn tuyệt đối tới TASK.md, số bước, câu "chỉ làm bước N; các bước khác do agent khác hoặc lượt sau làm", có commit hay không, và branch chưa merge của phần khác nếu bước này cần. Thiếu câu giới hạn thì agent đọc cả Kế hoạch và tưởng mình làm luôn bước sau.
    - Script in ra `terminal`. Ghi lại để gửi tin sau.
 3. Worktree mới: lần đầu Claude chạy ở đó, nó hỏi có tin thư mục này không. Agent hiện "Blocked" cho tới khi người dùng duyệt. Báo người dùng bấm vào agent đó để duyệt. Bạn không tự trả lời câu hỏi này.
 4. Ghi vào TASK.md: bước nào giao cho terminal nào, branch nào, lúc nào.
 5. Chờ báo cáo bằng `hc wait --children any`. Không dùng `sleep`. Agent báo về bằng `hc send`, tin nhắn hiện trong ô nhập của bạn.
-6. Agent báo về bằng một trong bốn trạng thái của developer (`DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN`, `BLOCKED`) và xử lý theo bước 4 của `/work`. `NEEDS_REPLAN` thì dừng các bước phụ thuộc, sửa Kế hoạch, và hỏi người dùng nếu đổi tiêu chí, hợp đồng hoặc file thân. Khi agent báo xong, đừng tin ngay tin nhắn. Kiểm tra: commit có thật và mới hơn lúc giao việc (`git -C <thư mục của agent> log -1 --format='%h %ci'`), đúng branch. Rồi tự ghi một dòng vào TASK.md: branch, commit, kết quả test, còn thiếu gì. Rồi giao các bước đang chờ bước đó.
+6. Agent báo về bằng một trong bốn trạng thái của developer (`DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN`, `BLOCKED`) và xử lý theo bước 4 của `/work`. `NEEDS_REPLAN` thì dừng các bước phụ thuộc, sửa Kế hoạch, và hỏi người dùng nếu đổi tiêu chí, hợp đồng hoặc file thân. Khi agent báo xong, đừng tin ngay tin nhắn. Kiểm tra: commit có thật và mới hơn lúc giao việc (`git -C <thư mục của agent> log -1 --format='%h %ci'`), đúng branch. Task không commit thì chạy `git -C <thư mục của agent> status --short`: file đã đổi phải khớp danh sách agent báo và nằm trong bước đó của Kế hoạch. Rồi tự ghi một dòng vào TASK.md: branch, commit, kết quả test, còn thiếu gì. Rồi giao các bước đang chờ bước đó.
 7. Khi agent báo kẹt: trả lời bằng `hc send <terminal> "..."` nếu bạn tự quyết được trong phạm vi kế hoạch. Ngoài phạm vi thì hỏi người dùng.
 8. Hết bước:
    - Nhiều repo: tóm tắt trong TASK.md branch và commit của từng repo.
    - Worktree: gộp các branch vào branch của task theo thứ tự trong kế hoạch (`git merge --no-ff <branch>` trong repo chính). Có xung đột thì dừng và hỏi người dùng. Gộp xong mới dọn: hỏi người dùng rồi `git worktree remove <thư mục>` và `git branch -d <branch>`. Không dọn worktree của branch chưa gộp.
-   - Rồi đi tiếp `/work` (kiểm tra, review). Push và PR theo ~/.claude/rules/preferences.md.
+   - Rồi đi tiếp `/work` (kiểm tra, review). Review trong Herdr là pane `--template reviewer`, không phải subagent. Push và PR theo ~/.claude/rules/preferences.md.
 
 ## Lệnh hay dùng
 - `hc ls`: các agent đang chạy.

@@ -9,6 +9,7 @@ python3 ~/.claude/skills/herdr-dispatch/dispatch.py <thư mục làm việc> <t�
 Không dùng Agent tool cho yêu cầu này. Lý do: người dùng muốn thấy agent chạy cạnh mình và nói chuyện thẳng với nó; subagent chạy nền thì họ không thấy và không chen vào được.
 
 - Bước ghi code của một task (`/work`, `/lead`) cũng mở thành pane, với `--template worker` theo skill `herdr-dispatch`. Không giao cho subagent tester hay developer; hook `herdr_agent_gate` sẽ chặn.
-- Agent tool chỉ còn dùng cho việc chỉ đọc mà người dùng không yêu cầu agent riêng: architect, reviewer, security-reviewer, tìm kiếm.
+- Review cũng mở thành pane, với `--template reviewer`. Không giao cho subagent reviewer hay security-reviewer; hook chặn, trừ khi lời gọi đến từ chính pane review.
+- Agent tool chỉ còn dùng cho architect và tìm kiếm nội bộ mà người dùng không yêu cầu agent riêng.
 - Sau khi mở, nói một dòng: tên pane, terminal, việc đã giao. Chờ báo về bằng `hc wait --children any` chạy nền, không dùng `sleep`.
 - Ngoài Herdr (biến trống, ví dụ Claude desktop) thì dùng Agent tool như thường.

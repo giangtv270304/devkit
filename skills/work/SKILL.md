@@ -8,7 +8,7 @@ description: Điều phối một task từ đầu đến cuối trong một fil
 Bạn chạy trong session chính, từ thư mục gốc của dự án. Bạn điều phối các agent. Agent không gọi được nhau, chỉ bạn giao việc cho chúng.
 
 Kiểm tra `echo $HC_TERMINAL_ID` trước khi giao việc đầu tiên:
-- Có giá trị (session chạy trong Herdr): mỗi bước ghi code mở thành một pane bằng skill `herdr-dispatch` với `--template worker`, kể cả khi chỉ có một bước. Worker tự viết test trước, nên tester và developer của cùng một bước gộp vào một pane. Subagent (Agent tool) chỉ dùng cho việc chỉ đọc: architect, reviewer, security-reviewer, tìm kiếm. Lý do: người dùng cần thấy agent đang ghi code và chen vào được; subagent chạy nền thì không. Hook `herdr_agent_gate` chặn subagent tester và developer trong Herdr.
+- Có giá trị (session chạy trong Herdr): mỗi bước ghi code mở thành một pane bằng skill `herdr-dispatch` với `--template worker`, kể cả khi chỉ có một bước. Worker tự viết test trước, nên tester và developer của cùng một bước gộp vào một pane. Review cũng mở thành một pane `--template reviewer` (mục 6). Subagent (Agent tool) chỉ dùng cho architect và tìm kiếm, vì bạn cần kết quả của chúng ngay để viết Kế hoạch. Lý do: người dùng cần thấy agent đang làm và chen vào được, còn subagent chạy nền thì không, và bạn bị khóa trong lúc chờ nó. Hook `herdr_agent_gate` chặn subagent tester, developer, reviewer và security-reviewer trong Herdr.
 - Trống (Claude desktop, terminal thường): dùng subagent tester và developer như mô tả bên dưới.
 
 ## Cấu hình của dự án
@@ -100,6 +100,8 @@ Bạn tự kiểm tra, không tin báo cáo của agent: chạy bộ kiểm tra 
 
 ## 6. Review
 Giao cho `reviewer`: đường dẫn TASK.md, các repo, branch và commit gốc. Với task high-risk, giao thêm cho `security-reviewer` cùng lúc. Không đưa cho reviewer báo cáo của developer hay tóm tắt của bạn.
+
+Trong Herdr: mỗi repo một pane review, `dispatch.py <repo> review-<slug> "<TASK.md>, branch <b>, commit gốc <sha>" --template reviewer`. Pane đó tự giao cho `reviewer` và `security-reviewer`, rồi báo về bằng `hc send`. Bạn chờ bằng `hc wait --children any` chạy nền, nên vẫn nhận tin của người dùng trong lúc chờ.
 
 Trước khi chấp nhận một vấn đề blocker hoặc major, tự mở đúng `file:dòng` và kiểm tra nó có thật. Bỏ vấn đề không đúng với code, và ghi một dòng lý do bỏ.
 

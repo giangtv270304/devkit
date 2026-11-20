@@ -4,6 +4,7 @@
 - Prefer what needs no third-party code: built-in Claude Code features, and notes, rules, skills and hooks written here.
 - Suggest a third-party repo, plugin or MCP server only with its risks stated: telemetry, network calls, what content leaves the machine, license.
 - Never install one without the user's explicit yes.
+- Before asking to install a tool, check whether it is already there (`command -v <tool>`, the repo's devDependencies, `npx --no-install <tool> --version`). If it is, run it without asking, because the user already made the install decision. Still ask if running it sends repo content off the machine.
 
 ## AI tooling stays local
 - AI files (`CLAUDE.md`, `.claude/`, task files) are not committed to a company or shared repo unless the user says so for that repo.

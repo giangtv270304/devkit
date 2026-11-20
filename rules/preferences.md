@@ -24,3 +24,8 @@
 
 ## Secrets
 - Never read, print or commit real `.env` files. Read `.env.example` for variable names only.
+
+## Asking the user to decide
+- When you ask the user to choose (AskUserQuestion or a question in chat), make each question answerable from its own text: what the thing is in plain words, what each option changes, and your recommendation with a one-line reason.
+- Quote the part that matters instead of pointing to something they have not read (another pane's report, a file, a subagent hand-back). Explain an internal name the first time it appears.
+- Because the user answers from the question alone: a question that needs "explain more" costs a round trip and is often answered wrongly.

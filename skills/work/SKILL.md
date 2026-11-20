@@ -38,7 +38,7 @@ Người dùng sửa task bằng cách viết ghi chú ngay trong TASK.md, ở d
 - Task mới: tạo `<task>/TASK.md` từ mẫu. Điền những gì bạn biết từ lời người dùng.
 
 ## 1. Phân loại và chọn đường đi
-Xem nhanh các repo được nhắc tới (CLAUDE.md của repo, tài liệu kiến trúc). Chọn một loại và ghi vào `Loại:`.
+Xem nhanh các repo được nhắc tới (CLAUDE.md của repo, tài liệu kiến trúc). Chọn một loại và ghi vào `Loại:`. Ghi `Ưu tiên:` theo ba câu hỏi trong `reference/task-file.md` (người dùng thật, tiền hay bảo mật bị ảnh hưởng; có người đang chờ; có hạn), và `Hạn:` khi người dùng nói hạn. Không rõ thì để `P2`, nói mức đã chọn trong cùng dòng báo loại, người dùng sửa bằng NOTE.
 
 | Loại | Dấu hiệu | Đường đi |
 |---|---|---|

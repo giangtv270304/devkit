@@ -3,6 +3,8 @@
 Phase: intent
 Cập nhật: YYYY-MM-DD
 Loại: small | bug | feature | cross-repo | spike | high-risk (thêm: data | ops | ui)
+Ưu tiên: P2
+Hạn:
 Branch:
 - <repo>: <branch>
 

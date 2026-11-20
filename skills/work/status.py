@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Print a markdown table of tasks in work/: phase, date, what the user must do, git state."""
+"""Print a markdown table of tasks in work/: priority, deadline, phase, date, what the user must do, git state."""
 import re
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -11,6 +12,9 @@ import project  # noqa: E402
 ROOT = project.root()
 WORK = ROOT / project.config(ROOT)["task dir"]
 LEGACY_NEXT = ("việc tiếp theo", "tiếp theo", "next")
+PRIORITIES = ("P0", "P1", "P2", "P3")
+DUE_SOON_DAYS = 2
+FINISH_FIRST = ("ship", "review", "verify", "build", "code", "plan", "intent")
 BRANCH_LINE = re.compile(r"^\s*[-*]\s*`?([\w.-]+)`?\s*:\s*`?([\w./-]+)`?")
 
 
@@ -45,7 +49,7 @@ def first_item(lines):
 
 def field(text, *names):
     for n in names:
-        m = re.search(rf"^[-*\s]*{n}:\s*(.+)$", text, re.M)
+        m = re.search(rf"^[-*\s]*{n}:[ \t]*(\S.*)$", text, re.M)
         if m:
             return m.group(1).strip()
     return ""
@@ -104,16 +108,41 @@ def task_row(d):
     return d.name, field(text, "Phase") or "?", field(text, "Cập nhật", "Updated"), "(mẫu cũ) " + nxt, "; ".join(branches_from(secs.get("branch", []))) or "chưa ghi branch"
 
 
+def task_priority(d, today=None):
+    """Return (shown priority, shown deadline, sort key) from the Ưu tiên: and Hạn: lines of TASK.md."""
+    task = d / "TASK.md"
+    text = task.read_text(encoding="utf-8") if task.exists() else ""
+    written = field(text, "Ưu tiên").upper()[:2]
+    level = PRIORITIES.index(written) if written in PRIORITIES else 2
+    shown = written if written in PRIORITIES else "?"
+    raw = field(text, "Hạn")
+    try:
+        due = date.fromisoformat(raw[:10])
+    except ValueError:
+        return shown, raw, (level, date.max)
+    left = (due - (today or date.today())).days
+    note = " (quá hạn)" if left < 0 else f" (còn {left} ngày)" if left <= DUE_SOON_DAYS else ""
+    if left <= DUE_SOON_DAYS and level > 1:
+        shown, level = f"{shown}→P1", 1
+    return shown, due.isoformat() + note, (level, due)
+
+
 def main():
     if not WORK.is_dir():
         print(f"Không có thư mục task: {WORK}")
         return
-    rows = [task_row(d) for d in sorted(WORK.iterdir()) if d.is_dir()]
-    rows.sort(key=lambda r: r[2], reverse=True)
-    rows.sort(key=lambda r: r[1] == "done")
-    print("| Task | Phase | Cập nhật | Cần bạn | Git |")
-    print("|---|---|---|---|---|")
-    for r in rows:
+    rows = []
+    for d in sorted(WORK.iterdir()):
+        if d.is_dir():
+            name, phase, updated, need, git_state = task_row(d)
+            prio, due, key = task_priority(d)
+            closeness = next((i for i, p in enumerate(FINISH_FIRST) if phase.startswith(p)), len(FINISH_FIRST))
+            rows.append(((phase == "done", key, closeness), (name, prio, due, phase, updated, need, git_state)))
+    rows.sort(key=lambda r: r[1][4], reverse=True)
+    rows.sort(key=lambda r: r[0])
+    print("| Task | Ưu tiên | Hạn | Phase | Cập nhật | Cần bạn | Git |")
+    print("|---|---|---|---|---|---|---|")
+    for _, r in rows:
         print("| " + " | ".join(c.replace("|", "\\|") for c in r) + " |")
 
 

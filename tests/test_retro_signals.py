@@ -49,6 +49,14 @@ class RetroSignalsTest(TempDirCase):
         self.assertNotIn("example.com", out)
         self.assertNotIn(FAKE_TOKEN, out)
 
+    def test_redacts_connection_url_and_password_variables(self):
+        self.write_session("s3", [entry("user", "sai rồi, dùng postgres://app:hunter2pw@db.local:5432/x "
+                                                "và PGPASSWORD='s3cr3tpw' psql")])
+        out = self.signals()
+        self.assertNotIn("hunter2pw", out)
+        self.assertNotIn("s3cr3tpw", out)
+        self.assertIn("postgres://app:<redacted>@db.local", out)
+
     def test_skips_sessions_without_friction_and_honours_grep(self):
         self.write_session("calm", [entry("user", "thêm endpoint mới")])
         self.write_session("other", [entry("user", "không phải task-x")])

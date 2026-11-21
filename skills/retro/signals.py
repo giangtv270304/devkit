@@ -24,6 +24,8 @@ CORRECTION = re.compile(
 REPORT = re.compile(r"\b(NEEDS_REPLAN|BLOCKED|DONE_WITH_CONCERNS)\b")
 TASK_LINE = re.compile(r"^\s*(> NOTE:|.*người dùng quyết:|.*NEEDS_REPLAN|.*BLOCKED|.*DONE_WITH_CONCERNS)", re.I)
 SECRET = [
+    (re.compile(r"\b([a-z][\w+.-]*://[^:/@\s]+:)[^@\s]+@", re.I), r"\1<redacted>@"),
+    (re.compile(r"\b(\w*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_?KEY)\w*)=('[^']*'|\"[^\"]*\"|\S+)", re.I), r"\1=<redacted>"),
     (re.compile(r"(?i)\b(bearer|token|secret|password|passwd|api[_-]?key)\b(\s*[:=]\s*|\s+)\S+"), r"\1=<redacted>"),
     (re.compile(r"\b(sk|pk|ghp|gho|xox[abp])[-_][A-Za-z0-9_-]{10,}"), "<redacted>"),
     (re.compile(r"\b[A-Fa-f0-9]{32,}\b"), "<hex>"),

@@ -28,6 +28,9 @@ BLOCKED = [
     "cat .env",
     "head -n 3 apps/api/.env.production",
     "grep KEY .env.local",
+    'DSN="$(grep KEY .env)"',
+    'X="a $(cat .env) b"',
+    'echo "$(echo "$(cat .env)")"',
     "source .env",
     ". .env",
     "echo hi; cat .env",
@@ -38,6 +41,9 @@ BLOCKED = [
 ]
 
 ALLOWED = [
+    'git commit -m "fix: read $(date) .env"',
+    'echo "cost $5 (cat .env)"',
+    "(cd a && ls); echo ok",
     "git push",
     "git push --force-with-lease origin feat",
     "git push -u origin feat",

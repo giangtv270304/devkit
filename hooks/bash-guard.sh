@@ -37,6 +37,7 @@ flush_seg() {
 
 # Split into segments of unquoted words (quotes removed, bash 3.2 compatible).
 q=""
+ret=""
 i=0
 n=${#cmd}
 while [ "$i" -lt "$n" ]; do
@@ -47,6 +48,9 @@ while [ "$i" -lt "$n" ]; do
     case "$c" in
       '"') q="" ;;
       '\') i=$((i + 1)); word+="${cmd:$i:1}" ;;
+      '$')
+        if [ "${cmd:$((i + 1)):1}" = "(" ]; then i=$((i + 1)); flush_seg; q=""; ret+="d"
+        else word+="$c"; fi ;;
       *) word+="$c" ;;
     esac
   else
@@ -54,7 +58,9 @@ while [ "$i" -lt "$n" ]; do
       "'" | '"') q="$c"; inword=1 ;;
       '\') i=$((i + 1)); word+="${cmd:$i:1}"; inword=1 ;;
       ' ' | $'\t') flush_word ;;
-      ';' | '&' | '|' | $'\n' | '(' | ')' | '`') flush_seg ;;
+      ';' | '&' | '|' | $'\n' | '`') flush_seg ;;
+      '(') flush_seg; ret+="p" ;;
+      ')') flush_seg; [ "${ret: -1}" = d ] && q='"'; ret="${ret%?}" ;;
       *) word+="$c"; inword=1 ;;
     esac
   fi

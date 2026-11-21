@@ -30,3 +30,9 @@
 - When you ask the user to choose (AskUserQuestion or a question in chat), make each question answerable from its own text: what the thing is in plain words, what each option changes, and your recommendation with a one-line reason.
 - Quote the part that matters instead of pointing to something they have not read (another pane's report, a file, a subagent hand-back). Explain an internal name the first time it appears.
 - Because the user answers from the question alone: a question that needs "explain more" costs a round trip and is often answered wrongly.
+
+## Drafting messages to other people
+- When the user asks you to draft or rewrite a reply to a partner, provider or colleague (chat, email), answer only what they asked: one to three short sentences per question. No background, no restating their question, no list of extra offers. Because the user sends it as is and has asked "shorter" on almost every draft.
+- Answer every question in the incoming message, in its numbering and order. Because a missing one costs a round trip.
+- When the draft is not in Vietnamese, put a Vietnamese translation of the draft under it, and a translation of the incoming message if the user has not seen one yet. Because the user checks the meaning in Vietnamese before sending.
+- When the user asks to expand one point, expand only that point and keep the rest as it was.

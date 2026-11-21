@@ -25,6 +25,8 @@
 
 ## Secrets
 - Never read, print or commit real `.env` files. Read `.env.example` for variable names only.
+- When a command needs a value that only `.env` or a credential you were not given holds (database URL, password, API key), do not fetch it another way (`$(grep ...)`, another host, a service file). Give the user the exact query or command to run themselves, read-only for checks (`begin read only`), plus what the output should look like. Because a blocked read retried in another form is still a secret read, and the user answers these blocks with "give me the query, I'll run it".
+- When a hook or the permission check denies a command, do not send it again unchanged. Switch to the hand-over above, or ask.
 
 ## Asking the user to decide
 - When you ask the user to choose (AskUserQuestion or a question in chat), make each question answerable from its own text: what the thing is in plain words, what each option changes, and your recommendation with a one-line reason.

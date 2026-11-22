@@ -13,7 +13,7 @@ Bắt đầu từ `.claude/project.md` ở gốc dự án (nếu có), CLAUDE.md
 
 Theo loại thay đổi, áp dụng skill tương ứng và ghi phần bắt buộc của nó vào Kế hoạch: schema, migration, backfill thì `data-design`; Dockerfile, CI, deploy, hạ tầng, biến môi trường thì `ops-change`; màn hình web hoặc mobile thì `frontend-change`; lựa chọn kiến trúc lớn (service mới, tích hợp mới, đổi luồng giữa các service) thì đề xuất chạy `/design` trước.
 
-Kế hoạch chi tiết mà sai còn tệ hơn kế hoạch ngắn. Chỉ ghi đường dẫn file chính xác khi bạn đã mở file đó. Phần còn lại ghi kết quả cần đạt, không đoán tên file hay tên hàm.
+Kế hoạch chi tiết mà sai còn tệ hơn kế hoạch ngắn. Chỉ ghi đường dẫn file chính xác khi bạn đã mở file đó. Phần còn lại ghi kết quả cần đạt, không đoán tên file hay tên hàm. Khi một bước thêm khóa hay trường mới vào file cấu hình, fragment, schema hoặc payload mà code khác đọc hay gộp, grep tên file hoặc tên khóa để tìm code đó, mở ra xem nó có nhận khóa mới không, và ghi nó vào bước nếu phải sửa. Lý do: code đọc thường chỉ xử lý các khóa nó đã biết, và nếu bỏ sót thì worker phải dừng NEEDS_REPLAN giữa chừng và người dùng phải duyệt thêm file thân.
 
 Trả về theo đúng thứ tự này:
 1. Các repo bị ảnh hưởng và lý do, kèm đường dẫn file.

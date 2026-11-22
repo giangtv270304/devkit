@@ -119,7 +119,7 @@ Ghi vào mục "Review": chỉ blocker và major ở bảng, minor gom thành m�
 ## 7. Bàn giao
 Tóm tắt theo từng repo trong chat: branch, commit (nếu được phép), kết quả kiểm tra, các mục review còn mở.
 
-Commit theo ~/.claude/rules/commits.md, mô tả PR theo ~/.claude/rules/pull-requests.md, push và PR theo ~/.claude/rules/preferences.md. Thêm: không chạy migration trên database dùng chung, không deploy, nếu người dùng chưa đồng ý rõ ràng trong session này.
+Commit theo ~/.claude/rules/commits.md, mô tả PR theo ~/.claude/rules/pull-requests.md, push và PR theo ~/.claude/rules/preferences.md. Trước khi merge vào branch mặc định, so `git -C <checkout chính> status --porcelain` với `git diff --name-only <branch mặc định>...<branch>`. Nếu có file trùng thì không merge cục bộ và không stash hay ghi đè file của người khác. Nếu preferences cho phép merge (hoặc người dùng đã bảo merge), gộp trên remote bằng `gh pr create` rồi `gh pr merge`, sau đó báo người dùng `git pull` khi họ đã xử lý file chưa commit. Nếu không được phép, nêu file trùng ngay trong câu hỏi bàn giao. Lý do: git từ chối merge khi file chưa commit trùng với branch, và phát hiện sau khi push thì mất thêm một lượt hỏi. Thêm: không chạy migration trên database dùng chung, không deploy, nếu người dùng chưa đồng ý rõ ràng trong session này.
 
 ## 8. Rút kinh nghiệm
 Đề xuất trong một dòng, làm khi người dùng đồng ý:

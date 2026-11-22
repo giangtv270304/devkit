@@ -16,13 +16,23 @@ git clone <this repo> ~/devkit
 ~/devkit/install.py --apply
 ```
 
-The first run is a dry run and prints one row per item. `--apply` links each skill, agent, rule and output style into `~/.claude/`, links `~/.claude/devkit` to this repo, and merges `settings/user.fragment.json` (hooks and deny rules) into `~/.claude/settings.json` after writing a backup next to it. It never overwrites a file it did not create.
+The first run is a dry run and prints one row per item. `--apply` links each skill, agent, rule and output style into `~/.claude/`, links `~/.claude/devkit` to this repo, and merges `settings/user.fragment.json` (hooks, deny rules and enabled plugins) into `~/.claude/settings.json` after writing a backup next to it. It never overwrites a file it did not create.
 
 If agents do not show up after install, run `./install.py --apply --copy-agents` (copies instead of links; re-run after each pull).
 
 Update: `git pull`. Links point into the repo, so changes apply to the next session. Re-run `install.py --apply` only when a file was added or `settings/user.fragment.json` changed.
 
 Remove: `./install.py --uninstall --apply`.
+
+## Go language server
+
+`install.py --apply` enables the official `gopls-lsp` plugin (`enabledPlugins` in `settings/user.fragment.json`; a value you set to `false` is kept). It does not install it. Run once, version 1.0.0 from the `claude-plugins-official` marketplace:
+
+```sh
+claude plugin install gopls-lsp@claude-plugins-official
+```
+
+The plugin only calls `gopls`, so `gopls` must be on `PATH` (`go install golang.org/x/tools/gopls@latest`, binary in `~/go/bin`). Remove it with `claude plugin uninstall gopls-lsp`.
 
 ## Once per clone
 
@@ -67,12 +77,13 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, fixing an instruction after a correction, opening agents inside Herdr |
 | `output-styles/` | `engineer-brief` and `plain-words` reply styles |
 | `templates/project.md`, `templates/adr.md` | starting points for a project's `.claude/project.md` and for an ADR when the project has no template |
-| `settings/user.fragment.json` | hooks and deny rules that `install.py` merges into `~/.claude/settings.json` |
+| `settings/user.fragment.json` | hooks, deny rules and enabled plugins that `install.py` merges into `~/.claude/settings.json` |
 | `denylist.example.txt` | format of `~/.config/devkit/denylist.txt`, read by the pre-commit hook |
 | `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
 | `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list |
 | `hooks/herdr_agent_gate.py` | inside Herdr, denies developer, tester, reviewer and security-reviewer subagents so the work runs in a visible pane, reviewer panes included |
+| `hooks/verify_before_stop.py` | on Stop and SubagentStop, blocks a code role (`DEVKIT_ROLE` worker/developer, subagent developer/tester) while `go build/vet/test` or the Node `type-check`/`test` scripts of the changed code fail; `DEVKIT_VERIFY=0` turns it off, `DEVKIT_VERIFY_TIMEOUT` (default 240s) caps the run |
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
 | `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |

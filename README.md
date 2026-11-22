@@ -2,6 +2,18 @@
 
 Personal Claude Code toolkit: skills, agents, rules, hooks and output styles that work in any project. Project-specific facts live in each project's `.claude/project.md`, never here.
 
+## Using it yourself
+
+This is one person's setup, shared as is under the MIT license. Fork it, then edit before `install.py --apply`, because the rules apply to every project and session:
+
+- `rules/preferences.md`: the commit, push and merge policy names the owner's GitHub account. Put yours in, or the "push without asking" case never applies.
+- `output-styles/` and `rules/writing-vi.md`: replies are in Vietnamese. Change the language line in the style you use.
+- `hooks/obsidian_daily.py` (Stop hook) writes session notes into an Obsidian vault (`OBSIDIAN_VAULT`). Set `OBSIDIAN_DAILY=off` or drop the hook from `settings/user.fragment.json` if you do not use Obsidian.
+- `rules/herdr.md` and `skills/herdr-dispatch` only act inside the Herdr app; outside it they fall back to subagents.
+- Copy `denylist.example.txt` to `~/.config/devkit/denylist.txt` with the names your commits must never carry.
+
+Run the dry run first and read each row before `--apply`.
+
 ## New machine
 
 ```bash

@@ -23,6 +23,8 @@ class IsGeneratedTest(unittest.TestCase):
             "/r/a.pb.go",
             "/r/a.gen.ts",
             "/r/types.d.ts",
+            "/r/api/docs/swagger.json",
+            "/r/docs/docs.go",
         ):
             self.assertTrue(self.is_generated(path), path)
 
@@ -55,6 +57,19 @@ class CommentGuardTest(TempDirCase):
         for line in ("//nolint:nilnil // cache miss", "//go:generate mockgen", "// @Router /widgets [post]"):
             out = self.edit("/r/a.go", "", f"{line}\nx := 1")
             self.assertEqual(out.returncode, 0, line)
+
+    def test_doc_comment_on_exported_declaration_is_allowed(self):
+        cases = [("/r/a.go", "// CreateWidget stores a widget.\nfunc (s *Service) CreateWidget() {}"),
+                 ("/r/a.go", "// Widget is a thing.\ntype Widget struct{}"),
+                 ("/r/a.ts", "/**\n * Lists widgets.\n */\nexport function list() {}")]
+        for path, new in cases:
+            with self.subTest(new=new):
+                self.assertEqual(self.edit(path, "", new).returncode, 0)
+
+    def test_comment_on_unexported_or_inside_body_is_blocked(self):
+        for new in ("// helper\nfunc helper() {}", "// loop over\nfor _, x := range xs {}", "// note\n\nfunc A() {}"):
+            with self.subTest(new=new):
+                self.assertEqual(self.edit("/r/a.go", "", new).returncode, 2)
 
     def test_generated_file_is_skipped(self):
         out = self.edit("/r/a.pb.go", "", "// big comment")

@@ -49,7 +49,27 @@ esac
 [ -n "$new" ] || exit 0
 
 trim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
-added=$(printf '%s\n' "$new" | trim | grep -E "$comment" | grep -Ev "$directive" | grep -vxF -f <(printf '%s\n' "$old" | trim) || true)
+# Allowed: a Go doc comment right above an exported declaration, a /** JSDoc */ block right above an export.
+exported='^(func ([(][^)]*[)] )?[A-Z]|type [A-Z]|var [A-Z]|const [A-Z]|export )'
+drop_doc() {
+  C="$comment" E="$exported" awk '
+    BEGIN { c = ENVIRON["C"]; e = ENVIRON["E"] }
+    { lines[NR] = $0 }
+    END {
+      i = 1
+      while (i <= NR) {
+        if (lines[i] ~ c) {
+          j = i
+          while (j <= NR && (lines[j] ~ c || lines[j] ~ /^[[:space:]]*\*/)) j++
+          doc = j <= NR && lines[j] ~ e && lines[i] !~ /^--/ && (lines[j] !~ /^export / || lines[i] ~ /^\/\*\*/)
+          keep = !doc
+          for (k = i; k < j; k++) if (keep && lines[k] ~ c) print lines[k]
+          i = j
+        } else i++
+      }
+    }'
+}
+added=$(printf '%s\n' "$new" | trim | drop_doc | grep -Ev "$directive" | grep -vxF -f <(printf '%s\n' "$old" | trim) || true)
 [ -n "$added" ] || exit 0
 
 {

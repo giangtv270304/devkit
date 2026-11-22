@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Installed by devkit git-local/install.sh. Blocks pushes that carry AI tooling files or AI attribution.
+# Installed by devkit git-local/install.sh. Blocks pushes that carry AI tooling files, AI attribution,
+# or secrets found by gitleaks (when installed).
 set -euo pipefail
 
 file_re='(^|/)(CLAUDE(\.local)?\.md|AGENTS\.md|GEMINI\.md|\.claude/|\.cursor/|\.cursorrules$|\.windsurfrules$|\.aider[^/]*|\.codex/|\.mcp\.json$|\.ai-workflow/|\.github/copilot-instructions\.md$)'
@@ -25,10 +26,24 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   if [ -n "$commits" ]; then
     problems+=$'\n'"AI attribution in commit messages for ${remote_ref}:"$'\n'"$(sed 's/^/  /' <<<"$commits")"
   fi
+
+  # Secret scan of the pushed commits, only when gitleaks is installed (it runs locally, no network).
+  if command -v gitleaks >/dev/null 2>&1; then
+    if [ "$remote_sha" = "$zero" ]; then
+      log_opts="$local_sha --not --remotes=$remote"
+    else
+      log_opts="$remote_sha..$local_sha"
+    fi
+    if gitleaks help git >/dev/null 2>&1; then
+      leaks=$(gitleaks git --no-banner --redact --log-opts="$log_opts" 2>&1) || problems+=$'\n'"gitleaks found secrets in commits for ${remote_ref}:"$'\n'"$(tail -n 20 <<<"$leaks" | sed 's/^/  /')"
+    else
+      leaks=$(gitleaks detect --no-banner --redact --log-opts="$log_opts" 2>&1) || problems+=$'\n'"gitleaks found secrets in commits for ${remote_ref}:"$'\n'"$(tail -n 20 <<<"$leaks" | sed 's/^/  /')"
+    fi
+  fi
 done
 
 if [ -n "$problems" ]; then
-  echo "push blocked: AI tooling must stay local.${problems}" >&2
+  echo "push blocked: AI tooling must stay local and secrets must not leave.${problems}" >&2
   echo "Remove the files from those commits (git rm --cached, then amend or rebase) or reword the messages." >&2
   echo "To push anyway on purpose: git push --no-verify" >&2
   exit 1

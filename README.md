@@ -66,8 +66,10 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/ops-change` | Dockerfile, CI/CD, deploy config, secrets, monitoring, rollback, runbooks |
 | `skills/frontend-change` | web and mobile screens: states, API contract, verification in a browser or simulator |
 | **Methods** | |
-| `skills/tdd`, `skills/debug` | test first; find the root cause before fixing |
+| `skills/tdd`, `skills/debug`, `skills/perf` | test first; find the root cause before fixing; measure before optimizing |
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
+| `skills/dependency-upgrade` | bump libraries in small batches, CVE fixes, one commit per batch |
+| `skills/address-review` | answer review comments on your own PR: check each, fix or push back, replies sent only after your ok |
 | **Herdr** (see the Herdr section) | |
 | `skills/herdr-dispatch` | open an agent as a pane or tab: a one-off with `helper`, or plan steps with `worker` (one agent per repo, or one git worktree per step) |
 | `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (reviews the diff itself by the rules in `agents/reviewer.md` or `agents/security-reviewer.md`), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
@@ -81,14 +83,16 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `denylist.example.txt` | format of `~/.config/devkit/denylist.txt`, read by the pre-commit hook |
 | `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
 | `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
-| `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list |
+| `hooks/bash-guard.sh` | blocks force push (`-f`, `+refspec`), `reset --hard`, `clean -fd`, wide `checkout`/`restore`, `branch -D`, `stash clear`, unsafe `rm -rf`, and reads of real `.env` files |
+| `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list, by Edit/Write or by a Bash write (`>`, `tee`, `sed -i`); generated files and tests pass; denies their edits while the repo is on `main`/`master` |
 | `hooks/herdr_agent_gate.py` | inside Herdr, denies developer, tester, reviewer and security-reviewer subagents so the work runs in a visible pane, reviewer panes included |
-| `hooks/verify_before_stop.py` | on Stop and SubagentStop, blocks a code role (`DEVKIT_ROLE` worker/developer, subagent developer/tester) while `go build/vet/test` or the Node `type-check`/`test` scripts of the changed code fail; `DEVKIT_VERIFY=0` turns it off, `DEVKIT_VERIFY_TIMEOUT` (default 240s) caps the run |
+| `hooks/verify_before_stop.py` | on Stop and SubagentStop, blocks a code role (`DEVKIT_ROLE` worker/developer, subagent developer/tester) while `go build/vet/test` or the Node `type-check`/`test` scripts of the changed code fail (a tester gets build/vet/type-check only; a `NEEDS_REPLAN` or `BLOCKED` report passes); `DEVKIT_VERIFY=0` turns it off, `DEVKIT_VERIFY_TIMEOUT` (default 240s) caps the run |
 | `hooks/format-edited-file.sh` | formats the file just edited |
 | `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
 | `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |
-| `hooks/comment-guard.sh` | after an edit to Go, TS/JS or SQL, sends new comment lines back to Claude to delete unless they pass `rules/comments.md` |
-| `git-local/` | hide AI files from git, block pushing them, and reject commit messages that break `rules/commits.md`, in any repo |
+| `hooks/comment-guard.sh` | after an edit to Go, TS/JS or SQL, sends new comment lines back to Claude to delete unless they pass `rules/comments.md`; Go doc comments on exported declarations and `/** */` JSDoc on exports pass |
+| `hooks/obsidian_daily.py` | on Stop, writes today's tasks and the day's prompts (secrets redacted) to the Obsidian daily note in `OBSIDIAN_VAULT`; if the vault syncs to a cloud, those prompts leave the machine. Turn off with `obsidian_daily.py --off` |
+| `git-local/` | hide AI files from git, block pushing them or secrets (`gitleaks`, when installed), and reject commit messages that break `rules/commits.md`, in any repo |
 | `tests/`, `Makefile` | `make test` runs the unit tests; `make lint` runs `bash -n`, `py_compile` and `shellcheck`/`ruff` when installed |
 
 ## Herdr

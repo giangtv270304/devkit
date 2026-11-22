@@ -20,7 +20,7 @@ class Timeout(Exception):
 
 
 def git(cwd, *args):
-    r = subprocess.run(["git", "-C", cwd, *args], capture_output=True, text=True)
+    r = subprocess.run(["git", "-C", cwd, "-c", "core.quotepath=off", *args], capture_output=True, text=True)
     return r.stdout if r.returncode == 0 else ""
 
 
@@ -54,12 +54,29 @@ def run_limited(cmd, cwd, deadline):
     return p.returncode, out
 
 
+def module_root(top, d):
+    while True:
+        if os.path.exists(os.path.join(top, d, "go.mod")):
+            return d
+        if not d:
+            return ""
+        d = os.path.dirname(d)
+
+
 def go_checks(top, files):
-    dirs = sorted({os.path.dirname(f) for f in files if f.endswith(".go")})
-    pkgs = ["./" + d if d else "." for d in dirs]
-    if not pkgs:
-        return []
-    return [(f"go {sub} {' '.join(pkgs)}", ["go", sub, *pkgs], top) for sub in ("build", "vet", "test")]
+    modules = {}
+    for f in files:
+        if f.endswith(".go"):
+            d = os.path.dirname(f)
+            root = module_root(top, d)
+            modules.setdefault(root, set()).add(os.path.relpath(d, root or "."))
+    checks = []
+    for root in sorted(modules):
+        pkgs = ["./" + d if d != "." else "." for d in sorted(modules[root])]
+        where = f" (in {root})" if root else ""
+        for sub in ("build", "vet", "test"):
+            checks.append((f"go {sub} {' '.join(pkgs)}{where}", ["go", sub, *pkgs], os.path.join(top, root)))
+    return checks
 
 
 def node_checks(top, files):

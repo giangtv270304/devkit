@@ -136,7 +136,7 @@ def merge_settings(current):
 
     plugins = merged.setdefault("enabledPlugins", {})
     for name, on in fragment.get("enabledPlugins", {}).items():
-        if UNINSTALL and name in plugins:
+        if UNINSTALL and plugins.get(name) is True:
             del plugins[name]
             changes.append(("plugin", name, "remove"))
         elif not UNINSTALL and name not in plugins:

@@ -95,6 +95,13 @@ class InstallTest(TempDirCase):
         self.install("--uninstall", "--apply")
         self.assertEqual(self.settings(), {"enabledPlugins": {"other@m": True}})
 
+    def test_uninstall_keeps_plugin_the_user_disabled(self):
+        name = "gopls-lsp@claude-plugins-official"
+        self.claude.mkdir()
+        (self.claude / "settings.json").write_text(json.dumps({"enabledPlugins": {name: False}}))
+        self.install("--uninstall", "--apply")
+        self.assertEqual(self.settings()["enabledPlugins"], {name: False})
+
     def test_plugin_the_user_disabled_stays_disabled(self):
         name = "gopls-lsp@claude-plugins-official"
         self.claude.mkdir()

@@ -141,3 +141,22 @@ class VerifyBeforeStopTest(TempDirCase):
         self.assertLess(time.monotonic() - start, 10)
         self.assertEqual(r.stdout, "")
         self.assertIn("bỏ qua kiểm tra", r.stderr)
+
+    def test_go_runs_per_module_in_nearest_go_mod_dir(self):
+        self.fake("go", 'echo "$(basename $PWD): $@" >> "$GOLOG"; exit 0')
+        self.write("a/go.mod")
+        self.write("a/x/one.go")
+        self.write("b/go.mod")
+        self.write("b/two.go")
+        log = self.tmp / "go.log"
+        self.assertEqual(self.hook(GOLOG=str(log)).stdout, "")
+        lines = log.read_text().split("\n")
+        self.assertEqual(lines[:3], ["a: build ./x", "a: vet ./x", "a: test ./x"])
+        self.assertEqual(lines[3:6], ["b: build .", "b: vet .", "b: test ."])
+
+    def test_non_ascii_file_name_is_not_dropped(self):
+        self.failing_go()
+        (self.repo / "svc" / "a.go").unlink()
+        self.write("svc/tên.go")
+        self.git("add", "svc/tên.go")
+        self.assertIn("go build ./svc", json.loads(self.hook().stdout)["reason"])

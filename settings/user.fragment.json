@@ -37,7 +37,7 @@
         "hooks": [{"type": "command", "command": "\"$HOME/.claude/devkit/hooks/bash-guard.sh\"", "timeout": 10}]
       },
       {
-        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
         "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/plan_gate.py\"", "timeout": 10}]
       },
       {

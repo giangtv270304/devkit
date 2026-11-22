@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""PreToolUse hook (Edit|Write|MultiEdit|NotebookEdit): ask the user before a gated agent edits a file
-that the plan section of its TASK.md does not list. A gated agent is a subagent whose type is listed, or a
+"""PreToolUse hook (Edit|Write|MultiEdit|NotebookEdit|Bash): ask the user before a gated agent edits a file
+that the plan section of its TASK.md does not list. For Bash it checks the files a command plainly writes
+(`> f`, `>> f`, `tee f`, `sed -i ... f`); generated files (hooks/lib/skip-generated.sh) and tests are always ok. A gated agent is a subagent whose type is listed, or a
 session started with a listed DEVKIT_ROLE (herdr-dispatch workers). Anything it cannot decide, it allows."""
+import fnmatch
 import json
 import os
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -15,6 +18,54 @@ GATED_AGENTS = set(filter(None, os.environ.get("PLAN_GATE_AGENTS", "developer,te
 PLAN_HEADINGS = ("kế hoạch", "plan")
 ALWAYS_OK = re.compile(r"(_test\.go|\.(test|spec)\.[cm]?[jt]sx?|/testdata/.*|/__snapshots__/.*)$")
 BACKTICKED = re.compile(r"`([^`\s]+)`")
+SKIP_FILE = Path(__file__).resolve().parent / "lib" / "skip-generated.sh"
+REDIRECT = re.compile(r"(?<![0-9&])>>?\s*([^\s;&|<>()]+)")
+SEPARATORS = {";", "&&", "||", "|", "&"}
+
+
+def generated_patterns():
+    try:
+        text = SKIP_FILE.read_text()
+    except OSError:
+        return []
+    m = re.search(r"case \"\$1\" in\s*\n\s*([^)]+)\)", text)
+    return m.group(1).split("|") if m else []
+
+
+def is_generated(target):
+    return any(fnmatch.fnmatch(target, p) for p in generated_patterns())
+
+
+def bash_targets(cmd, cwd):
+    found = set(REDIRECT.findall(cmd))
+    try:
+        words = shlex.split(cmd, posix=True)
+    except ValueError:
+        words = cmd.split()
+    segs, cur = [], []
+    for w in words:
+        if w in SEPARATORS:
+            segs.append(cur)
+            cur = []
+        else:
+            cur.append(w)
+    segs.append(cur)
+    for seg in segs:
+        if not seg:
+            continue
+        name = Path(seg[0]).name
+        args = [a for a in seg[1:] if not a.startswith("-")]
+        if name == "tee":
+            found.update(args)
+        elif name in ("sed", "gsed") and any(a == "-i" or a.startswith("-i") or a == "--in-place" for a in seg[1:]) and len(args) >= 2:
+            found.update(args[1:])
+    out = []
+    for t in found:
+        if t.startswith(("/dev/", "&")) or "$" in t:
+            continue
+        p = Path(t).expanduser()
+        out.append(str(p if p.is_absolute() else Path(cwd) / p))
+    return out
 
 
 def plan_paths(task):
@@ -37,18 +88,31 @@ def main():
     if role not in GATED_AGENTS:
         return
     tool_input = data.get("tool_input") or {}
-    target = tool_input.get("file_path") or tool_input.get("notebook_path")
-    if not target:
+    if data.get("tool_name") == "Bash" or "command" in tool_input:
+        targets = bash_targets(tool_input.get("command") or "", data.get("cwd") or ".")
+    else:
+        targets = [t for t in (tool_input.get("file_path") or tool_input.get("notebook_path"),) if t]
+    if not targets:
         return
     task = tasklib.find_task(data)
     if not task:
         return
-    if ALWAYS_OK.search(target) or Path(target).resolve().is_relative_to(task.parent.resolve()):
-        return
     paths = plan_paths(task)
-    if not paths or listed(target, paths):
+    if not paths:
         return
-    reason = f"{role} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {target}"
+    cwd = Path(data.get("cwd") or ".").resolve()
+    tmp = [Path(d).resolve() for d in ("/tmp", "/private/tmp", os.environ.get("TMPDIR") or "/tmp")]
+
+    def scratch(t):
+        r = Path(t).resolve()
+        return not r.is_relative_to(cwd) and any(r.is_relative_to(d) for d in tmp)
+
+    outside = [t for t in targets
+               if not (ALWAYS_OK.search(t) or is_generated(t) or listed(t, paths) or scratch(t)
+                       or Path(t).resolve().is_relative_to(task.parent.resolve()))]
+    if not outside:
+        return
+    reason = f"{role} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {', '.join(outside)}"
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": "ask",

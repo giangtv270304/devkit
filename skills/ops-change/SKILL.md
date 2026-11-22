@@ -17,6 +17,17 @@ Lỗi trong code hỏng một tính năng. Lỗi trong hạ tầng hỏng mọi 
 - Image: build nhiều tầng, chạy bằng user không phải root, chỉ chép thứ cần chạy.
 - Thay đổi ảnh hưởng nhiều service (gateway, mạng, database dùng chung, CI chung): ghi danh sách service bị ảnh hưởng và thứ tự làm.
 
+## GitHub Actions
+Người ngoài (không có quyền ghi) mở được PR từ fork, tạo issue, viết comment. Khi sửa `.github/workflows/` hay `action.yml`, chặn đường họ chạy code với token hay secret của repo:
+- `${{ }}` mang chữ người ngoài đặt được (tiêu đề PR, tên branch, nội dung comment hay issue) không đặt thẳng trong `run:`. Đưa qua `env:` rồi dùng `"$VAR"` trong shell. Trong `if:` và `with:` thì không sao. Số PR, sha, tên repo cũng không sao.
+- `pull_request_target` và `workflow_run` chạy với secret: không checkout hay chạy code của PR trong đó. Cần chạy code của PR thì dùng `pull_request`.
+- Workflow chạy theo comment (`issue_comment`) kiểm `author_association` trước khi làm gì.
+- Khai `permissions:` nhỏ nhất ở đầu file (thường `contents: read`), mở thêm theo từng job.
+- Action của bên thứ ba ghim theo full sha, kèm comment tên version. Action `actions/*` và `github/*` ghim theo tag được.
+- Job chạy agent AI trên PR của người ngoài: `CLAUDE.md`, `AGENTS.md`, `Makefile` của PR là chữ của người ngoài; job đó không có secret hay quyền ghi.
+
+Theo getsentry/skills `gha-security-review` (Apache-2.0).
+
 ## Mỗi thay đổi ghi vào Kế hoạch
 1. Thay đổi gì, ở môi trường nào trước (dev hoặc staging trước, production sau).
 2. Cách kiểm tra trước khi áp dụng: lệnh xem trước và kết quả mong đợi.

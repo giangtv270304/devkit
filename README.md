@@ -82,6 +82,8 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/dependency-upgrade` | bump libraries in small batches, CVE fixes, one commit per batch |
 | `skills/address-review` | answer review comments on your own PR: check each, fix or push back, replies sent only after your ok |
+| `skills/fix-ci`, `skills/resolve-conflicts` | red CI checks: read the failed log, name the cause, reproduce and pass locally before push; merge conflicts: each side's intent, user approves how to resolve |
+| `skills/vet-third-party` | read every file of a third-party skill, plugin, hook or MCP before installing or copying it: injection, hidden commands, secret reads, config writes, data sent out, license |
 | **Herdr** (see the Herdr section) | |
 | `skills/herdr-dispatch` | open an agent as a pane or tab: a one-off with `helper`, or plan steps with `worker` (one agent per repo, or one git worktree per step) |
 | `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (reviews the diff itself by the rules in `agents/reviewer.md` or `agents/security-reviewer.md`), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |

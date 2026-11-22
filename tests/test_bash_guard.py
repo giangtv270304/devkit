@@ -38,6 +38,15 @@ BLOCKED = [
     "cat < .env",
     "FOO=1 sudo rm -rf /var/data",
     "/bin/rm -rf /usr/local",
+    "git push origin +main",
+    "git push origin +HEAD:main",
+    "git checkout .",
+    "git checkout -- .",
+    "git restore .",
+    "git restore --worktree --staged .",
+    "git branch -D feat/x",
+    "git branch --delete --force feat/x",
+    "git stash clear",
 ]
 
 ALLOWED = [
@@ -69,6 +78,13 @@ ALLOWED = [
     "grep -r TOKEN src/",
     "cat environment.md",
     "cat README.md | grep env",
+    "git checkout -b feat/x",
+    "git checkout main",
+    "git checkout -- src/a.go",
+    "git restore --staged .",
+    "git branch -d feat/x",
+    "git stash push -u -m wip",
+    "git stash drop stash@{0}",
 ]
 
 

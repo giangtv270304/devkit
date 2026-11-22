@@ -135,9 +135,36 @@ check_git() {
         case "$a" in
           --force | -f) force=1 ;;
           -[a-zA-Z]*) case "$a" in --*) ;; *f*) force=1 ;; esac ;;
+          +?*) force=1 ;;
         esac
       done
-      [ "$force" = 1 ] && block "git push --force rewrites remote history. Use git push --force-with-lease." ;;
+      [ "$force" = 1 ] && block "git push --force (or a +refspec) rewrites remote history. Use git push --force-with-lease." ;;
+    checkout | restore)
+      local staged=0 worktree=0
+      for a in "$@"; do
+        case "$a" in
+          --staged | -S) staged=1 ;;
+          --worktree | -W) worktree=1 ;;
+        esac
+      done
+      [ "$sub" = restore ] && [ "$staged" = 1 ] && [ "$worktree" = 0 ] && return 0
+      for a in "$@"; do
+        case "$a" in
+          . | ./ | :/ | '*' | ':/*') block "git $sub $a discards every uncommitted change. Name the files, or git stash push -u -m <tag> first." ;;
+        esac
+      done ;;
+    branch)
+      for a in "$@"; do
+        case "$a" in
+          --force) force=1 ;;
+          --delete) dir=1 ;;
+          --*) ;;
+          -*) case "$a" in *D*) force=1; dir=1 ;; esac; case "$a" in *d*) dir=1 ;; esac; case "$a" in *f*) force=1 ;; esac ;;
+        esac
+      done
+      [ "$force" = 1 ] && [ "$dir" = 1 ] && block "git branch -D deletes a branch even if it is not merged. Use git branch -d." ;;
+    stash)
+      [ "${1:-}" = clear ] && block "git stash clear drops every stash for good. Drop one with git stash drop <ref> after checking it." ;;
     reset)
       for a in "$@"; do
         [ "$a" = "--hard" ] && block "git reset --hard discards local work. Use git stash push -u -m <tag> or git reset --mixed."

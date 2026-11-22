@@ -33,8 +33,10 @@ class VerifyBeforeStopTest(TempDirCase):
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text)
 
-    def hook(self, role="worker", agent_type=None, active=False, **env):
+    def hook(self, role="worker", agent_type=None, active=False, last=None, **env):
         data = {"cwd": str(self.repo), "stop_hook_active": active}
+        if last is not None:
+            data["last_assistant_message"] = last
         if agent_type:
             data["agent_type"] = agent_type
         full = {"DEVKIT_ROLE": role, "PATH": f"{self.bin}:{os.environ['PATH']}", "DEVKIT_VERIFY": ""}
@@ -72,6 +74,30 @@ class VerifyBeforeStopTest(TempDirCase):
         self.failing_go()
         for kind in ("developer", "tester"):
             self.assertIn("block", self.hook(role="", agent_type=kind).stdout)
+
+    def test_tester_skips_go_test_so_new_failing_tests_can_stop(self):
+        self.fake("go", 'echo "$@" >> "$GOLOG"; [ "$1" = test ] && exit 1; exit 0')
+        self.write("svc/a_test.go", "package svc")
+        log = self.tmp / "go.log"
+        r = self.hook(role="", agent_type="tester", GOLOG=str(log))
+        self.assertEqual(r.stdout, "")
+        self.assertEqual(log.read_text().split("\n")[:2], ["build ./svc", "vet ./svc"])
+        self.assertNotIn("test ./svc", log.read_text())
+
+    def test_needs_replan_or_blocked_report_is_let_through(self):
+        self.failing_go()
+        for last in ("NEEDS_REPLAN: plan misses config.go", "`BLOCKED`: no DB url"):
+            self.assertEqual(self.hook(last=last).stdout, "")
+        self.assertIn("block", self.hook(last="DONE: all green").stdout)
+
+    def test_report_status_read_from_transcript(self):
+        self.failing_go()
+        tr = self.tmp / "t.jsonl"
+        tr.write_text(json.dumps({"type": "assistant", "message": {"content": [{"type": "text", "text": "BLOCKED: x"}]}}) + "\n")
+        data = {"cwd": str(self.repo), "transcript_path": str(tr)}
+        env = {"DEVKIT_ROLE": "worker", "PATH": f"{self.bin}:{os.environ['PATH']}", "DEVKIT_VERIFY": ""}
+        r = run([sys.executable, str(HOOK)], env=env, input=json.dumps(data))
+        self.assertEqual(r.stdout, "")
 
     def test_developer_role_is_checked(self):
         self.failing_go()

@@ -64,6 +64,7 @@
     "Stop": [
       {
         "hooks": [
+          {"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/verify_before_stop.py\"", "timeout": 260},
           {"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/task_log.py\"", "timeout": 10},
           {"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/obsidian_daily.py\" --hook", "timeout": 15}
         ]
@@ -71,7 +72,10 @@
     ],
     "SubagentStop": [
       {
-        "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/task_log.py\"", "timeout": 10}]
+        "hooks": [
+          {"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/verify_before_stop.py\"", "timeout": 260},
+          {"type": "command", "command": "python3 \"$HOME/.claude/devkit/hooks/task_log.py\"", "timeout": 10}
+        ]
       }
     ]
   }

@@ -1,8 +1,9 @@
 # Working preferences (all projects)
 
 ## Third-party tools
-- Prefer what needs no third-party code: built-in Claude Code features, and notes, rules, skills and hooks written here.
-- Suggest a third-party repo, plugin or MCP server only with its risks stated: telemetry, network calls, what content leaves the machine, license.
+- Judge a third-party repo, plugin or MCP server by benefit against risk, not by being third-party. A rule in this devkit is an input to that judgement: when a candidate breaks one, say which rule and whether changing it is worth it.
+- State the risks: telemetry, network calls, what content leaves the machine, license, whether it runs code or is markdown only.
+- Prefer installing as-is when it is an official Anthropic plugin or markdown only, pinned to a version, and sends no repo content off the machine; copy and adapt when it needs changes to fit this devkit's workflow.
 - Never install one without the user's explicit yes.
 - Before asking to install a tool, check whether it is already there (`command -v <tool>`, the repo's devDependencies, `npx --no-install <tool> --version`). If it is, run it without asking, because the user already made the install decision. Still ask if running it sends repo content off the machine.
 

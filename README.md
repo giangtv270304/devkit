@@ -104,5 +104,5 @@ Claude desktop and Herdr run the same flow. `/work` uses subagents outside Herdr
 ## Rules for this repo
 
 - No company, client, repo, service or vendor names. No secrets. No real `.env`.
-- Third-party code is not vendored here.
+- Third-party code is not vendored here, except MIT/Apache text copied with its source and license noted. Official plugins are enabled through `settings/user.fragment.json`, not copied.
 - File names are lowercase with hyphens, except `SKILL.md`, `README.md` and the `TASK.md` files skills create.

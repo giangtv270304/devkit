@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse hook (Edit|Write|MultiEdit|NotebookEdit|Bash): ask the user before a gated agent edits a file
-that the plan section of its TASK.md does not list. For Bash it checks the files a command plainly writes
+that the plan section of its TASK.md does not list, and deny any edit while the repo is on main or master. For Bash it checks the files a command plainly writes
 (`> f`, `>> f`, `tee f`, `sed -i ... f`); generated files (hooks/lib/skip-generated.sh) and tests are always ok. A gated agent is a subagent whose type is listed, or a
 session started with a listed DEVKIT_ROLE (herdr-dispatch workers). Anything it cannot decide, it allows."""
 import fnmatch
@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -78,6 +79,27 @@ def plan_paths(task):
     return paths
 
 
+def on_default_branch(target):
+    d = Path(target).parent
+    while not d.exists() and d != d.parent:
+        d = d.parent
+    try:
+        r = subprocess.run(["git", "-C", str(d), "symbolic-ref", "--short", "-q", "HEAD"],
+                           capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    branch = r.stdout.strip()
+    return branch if r.returncode == 0 and branch in ("main", "master") else None
+
+
+def decide(decision, reason):
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": decision,
+        "permissionDecisionReason": reason,
+    }}, ensure_ascii=False))
+
+
 def listed(target, paths):
     return any(target == p or target.endswith("/" + p) for p in paths)
 
@@ -94,6 +116,11 @@ def main():
         targets = [t for t in (tool_input.get("file_path") or tool_input.get("notebook_path"),) if t]
     if not targets:
         return
+    for t in targets:
+        branch = on_default_branch(t)
+        if branch:
+            return decide("deny", f"{role} không được sửa file khi repo đang ở branch {branch}: {t}. "
+                                  "Tạo hoặc chuyển sang branch của task trước (feat/<slug>, fix/<slug>).")
     task = tasklib.find_task(data)
     if not task:
         return
@@ -112,12 +139,7 @@ def main():
                        or Path(t).resolve().is_relative_to(task.parent.resolve()))]
     if not outside:
         return
-    reason = f"{role} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {', '.join(outside)}"
-    print(json.dumps({"hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "permissionDecision": "ask",
-        "permissionDecisionReason": reason,
-    }}, ensure_ascii=False))
+    decide("ask", f"{role} muốn sửa file không có trong Kế hoạch của {task.parent.name}/TASK.md: {', '.join(outside)}")
 
 
 if __name__ == "__main__":

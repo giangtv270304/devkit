@@ -55,3 +55,12 @@ class PlanGateTest(TempDirCase):
                     "go build -o /tmp/bin ./... > /tmp/out.log", "ls >&2"):
             with self.subTest(cmd=cmd):
                 self.assertEqual(self.gate(None, role="worker", command=cmd), "")
+
+    def test_gated_role_is_denied_on_main(self):
+        import subprocess
+        subprocess.run(["git", "-C", str(self.tmp), "init", "-q", "-b", "main"], check=True)
+        out = self.gate("internal/service/create_x.go", role="worker")
+        self.assertIn('"deny"', out)
+        subprocess.run(["git", "-C", str(self.tmp), "checkout", "-q", "-b", "feat/x"], check=True)
+        self.assertEqual(self.gate("internal/service/create_x.go", role="worker"), "")
+        self.assertEqual(self.gate("internal/service/create_x.go"), "")

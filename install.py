@@ -134,6 +134,17 @@ def merge_settings(current):
     if not merged["permissions"]:
         del merged["permissions"]
 
+    plugins = merged.setdefault("enabledPlugins", {})
+    for name, on in fragment.get("enabledPlugins", {}).items():
+        if UNINSTALL and name in plugins:
+            del plugins[name]
+            changes.append(("plugin", name, "remove"))
+        elif not UNINSTALL and name not in plugins:
+            plugins[name] = on
+            changes.append(("plugin", name, "add"))
+    if not plugins:
+        del merged["enabledPlugins"]
+
     hooks = merged.setdefault("hooks", {})
     for event, entries in fragment["hooks"].items():
         have = hooks.setdefault(event, [])

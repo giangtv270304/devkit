@@ -84,6 +84,24 @@ class InstallTest(TempDirCase):
         self.assertFalse((self.claude / "skills" / "work").exists())
         self.assertFalse((self.bin / "herdr-task").exists())
 
+    def test_enabled_plugin_is_added_kept_and_removed(self):
+        name = "gopls-lsp@claude-plugins-official"
+        self.claude.mkdir()
+        (self.claude / "settings.json").write_text(json.dumps({"enabledPlugins": {"other@m": True}}))
+        dry = self.install()
+        self.assertRegex(dry.stdout, rf"plugin\s+{name}\s+would add")
+        self.install("--apply")
+        self.assertEqual(self.settings()["enabledPlugins"], {"other@m": True, name: True})
+        self.install("--uninstall", "--apply")
+        self.assertEqual(self.settings(), {"enabledPlugins": {"other@m": True}})
+
+    def test_plugin_the_user_disabled_stays_disabled(self):
+        name = "gopls-lsp@claude-plugins-official"
+        self.claude.mkdir()
+        (self.claude / "settings.json").write_text(json.dumps({"enabledPlugins": {name: False}}))
+        self.install("--apply")
+        self.assertIs(self.settings()["enabledPlugins"][name], False)
+
     def test_foreign_file_is_not_overwritten(self):
         (self.claude / "agents").mkdir(parents=True)
         mine = self.claude / "agents" / "developer.md"

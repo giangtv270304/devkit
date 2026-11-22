@@ -91,7 +91,8 @@ class InstallTest(TempDirCase):
         dry = self.install()
         self.assertRegex(dry.stdout, rf"plugin\s+{name}\s+would add")
         self.install("--apply")
-        self.assertEqual(self.settings()["enabledPlugins"], {"other@m": True, name: True})
+        ours = json.loads((REPO / "settings" / "user.fragment.json").read_text())["enabledPlugins"]
+        self.assertEqual(self.settings()["enabledPlugins"], {"other@m": True, **ours})
         self.install("--uninstall", "--apply")
         self.assertEqual(self.settings(), {"enabledPlugins": {"other@m": True}})
 

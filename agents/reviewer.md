@@ -41,6 +41,24 @@ So sánh branch của task với branch gốc trong mỗi repo, rồi kiểm tra
 8. Theo loại file, kiểm tra thêm theo skill tương ứng: migration và schema theo `data-design` (expand/contract, khóa bảng, backfill theo lô, có cách lùi); CI, Dockerfile, deploy theo `ops-change` (ghim phiên bản, không secret, có cách lùi); giao diện theo `frontend-change` (đủ trạng thái tải/rỗng/lỗi, không giữ token ở client, có ảnh chụp bằng chứng).
 9. Comment (~/.claude/rules/comments.md): đánh dấu minor mọi comment mới không qua bài kiểm tra của rule. Đề xuất cách sửa: xóa, đổi tên, hoặc chuyển lý do vào mô tả PR / log message.
 
+## Lỗi bị nuốt im lặng
+Lỗi bị bỏ qua làm code báo thành công khi việc chưa xong. Với mỗi chỗ xử lý lỗi trong diff, hỏi: nếu bước này fail thì người gọi và người dùng có biết không? Trong luồng tiền, xác thực, webhook thì là blocker; chỗ khác là major nếu mất dữ liệu hoặc trạng thái sai, ngoài ra minor.
+
+Go:
+- `if err != nil { log.Error(...); continue }` trong vòng lặp xử lý: item lỗi biến mất, lô vẫn báo xong.
+- `if err != nil { return nil }` hoặc `return nil, nil` khi lẽ ra trả `err`.
+- `_ = err`, `_ = tx.Rollback()` hay `defer f.Close()` bỏ qua lỗi của thao tác ghi.
+- Gọi provider lỗi mà trả giá trị mặc định (`return 0, nil`, `return Status("success")`, số dư rỗng).
+- Goroutine chỉ log lỗi, không gửi qua channel hay `errgroup`; `go func() { _ = do() }()`.
+
+Node / TypeScript:
+- `catch {}` hoặc `catch (e) { console.error(e) }` rồi chạy tiếp như không có gì.
+- `.catch(() => null)` hay `.catch(() => [])` làm lỗi mạng trông như "không có dữ liệu".
+- Promise không `await` (`save(order);` thiếu `await`, `forEach(async ...)`): lỗi thành unhandled rejection, hàm đã trả thành công.
+- `try` bao cả hàm rồi `return { ok: true }` ở nhánh catch.
+
+Khi báo, ghi `file:dòng`, đầu vào làm bước đó fail, và hậu quả người dùng thấy. Lỗi cố ý bỏ qua (best effort) thì phải có lý do viết ở chỗ đó hoặc ở mô tả task; không có thì vẫn báo.
+
 Không báo lỗi vặt: tên biến, style, format, thứ tự import, hay cách viết bạn thích hơn. Lint lo phần đó. Chỉ báo tên gọi khi nó làm người đọc hiểu sai hành vi.
 
 Trước khi ghi một vấn đề blocker hoặc major, mở lại đúng `file:dòng` và nói được đầu vào nào dẫn tới kết quả sai nào. Không nói được thì hạ xuống minor và ghi "chưa chắc".

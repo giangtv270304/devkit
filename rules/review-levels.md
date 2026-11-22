@@ -14,7 +14,7 @@ Skill `work` và skill `review-pr` dùng chung file này. Mỗi file bị sửa 
   - code dùng chung trong một repo: middleware, config, client gọi nhà cung cấp, khởi động server,
   - dữ liệu cá nhân,
   - luồng đang chạy cho người dùng thật, khi thay đổi không có biến bật/tắt hay route riêng,
-  - mọi thứ mà mục "Thân riêng của dự án" trong `.claude/project.md` liệt kê.
+  - mọi thứ mà mục "Project trunk" trong `.claude/project.md` liệt kê.
 - **Lá**: người dùng đọc lướt. Một file là lá khi nó đứng riêng và không thuộc danh sách thân. Ví dụ: một handler mới chưa nối vào luồng chính, một màn hình quản trị mới, một hàm chỉ đọc dữ liệu, test, tài liệu.
 
 Khi không chắc, chọn thân. Mọi bảng tóm tắt xếp file thân lên trước.

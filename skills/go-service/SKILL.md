@@ -123,7 +123,7 @@ Repo và handler test trên Postgres thật (`testutil.NewPostgres(t)`), nhà cu
 
 ## 10. Linter: những lỗi AI hay mắc
 
-Lint theo cấu hình của chính repo đó, đúng phiên bản golangci-lint (`version: "2"` thì v2, ngược lại v1.64.8). Code mới phải qua lint của repo; không bật thêm linter cho repo cũ. Viết theo kiểu chặt luôn an toàn. Danh sách lỗi hay mắc và cách chạy đúng phiên bản: `reference/linters.md`.
+Lint theo cấu hình của chính repo đó, đúng phiên bản golangci-lint (`version: "2"` hoặc không có cấu hình thì v2, cấu hình cũ thì v1.64.8). Code mới phải qua lint của repo; không bật thêm linter cho repo cũ. Viết theo kiểu chặt luôn an toàn. Danh sách lỗi hay mắc và cách chạy đúng phiên bản: `reference/linters.md`.
 
 ## 11. Comment
 

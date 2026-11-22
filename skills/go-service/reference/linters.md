@@ -20,6 +20,7 @@ Viết theo kiểu chặt bên dưới luôn an toàn: code viết đúng kiểu
 
 Lệnh kiểm tra: `make lint`. Phiên bản golangci-lint phải khớp định dạng cấu hình của repo:
 - Cấu hình có dòng `version: "2"`: dùng golangci-lint v2.
-- Cấu hình không có dòng đó, hoặc repo không có cấu hình: dùng v1.64.8.
+- Cấu hình không có dòng đó: dùng v1.64.8.
+- Repo không có cấu hình: dùng v2, vì v2 chạy được bộ mặc định mà không cần file.
 
-Makefile chỉ cài v1.64.8 khi máy chưa có golangci-lint, nên `make lint` có thể chạy sai phiên bản. Kiểm tra bằng `golangci-lint --version`. Nếu sai, chạy thẳng đúng phiên bản: `go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8 run ./...` (v1) hoặc `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest run ./...` (v2).
+Makefile chỉ cài v1.64.8 khi máy chưa có golangci-lint, nên `make lint` có thể chạy sai phiên bản. Kiểm tra bằng `golangci-lint --version`. Nếu sai, chạy thẳng đúng phiên bản: `go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8 run ./...` (v1) hoặc `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2 run ./...` (v2).

@@ -6,7 +6,7 @@
 - File thay cho bàn giao giữa các session. Session sau chỉ biết những gì ghi trong file này.
 
 Cập nhật TASK.md ở mọi ĐIỂM DỪNG, khi xong mỗi mục trong Kế hoạch, và trước khi kết thúc mỗi lượt trả lời có việc mới: Tóm tắt, `Phase:`, `Cập nhật:`, checklist, quyết định mới.
-- `Phase:` chỉ chứa đúng một giá trị: `intent`, `plan`, `build`, `verify`, `review`, `ship`, `done`.
+- `Phase:` chỉ chứa đúng một giá trị: `intent`, `plan`, `build`, `verify`, `review`, `ship`, `done`. Bước 4 (Code) của `/work` là `build`.
 - `Cập nhật:` dạng `YYYY-MM-DD`.
 - `Ưu tiên:` đúng một giá trị, chọn bằng câu hỏi đầu tiên trả lời "có":
   - `P0`: người dùng thật, tiền hoặc bảo mật đang bị ảnh hưởng. Làm ngay, bỏ việc khác.

@@ -34,6 +34,7 @@ Skill này chỉ đọc code. Không sửa code, không commit, không push.
 ## 3. Review
 - Giao cho `reviewer`: đường dẫn TASK.md, repo, đường dẫn worktree, và lệnh diff `git diff origin/<baseRefName>...HEAD` chạy trong worktree.
 - Nếu PR là high-risk: giao thêm cho `security-reviewer` cùng lúc, cùng thông tin.
+- Trong Herdr (`echo $HC_TERMINAL_ID` có giá trị), hook `herdr_agent_gate` chặn subagent review. Mở pane thay vào: `python3 ~/.claude/skills/herdr-dispatch/dispatch.py <worktree> review-pr<số> "<TASK.md>, diff: git diff origin/<baseRefName>...HEAD" --template reviewer`; high-risk thêm pane `security-pr<số>` với chữ `security` trong câu giao việc. Chờ bằng `hc wait <terminal>` chạy nền.
 - Không đưa cho agent ý kiến của bạn, comment đã có trên PR, hay tóm tắt của bạn. Agent đọc code như người lạ.
 - Bạn tự chạy lint và test của repo trong worktree (lệnh trong project.md hoặc CLAUDE.md của repo). Ghi mỗi kết quả một dòng vào "Quyết định và bằng chứng". Nếu lint hay test đã fail trên branch gốc, ghi rõ để không đổ lỗi cho PR.
 

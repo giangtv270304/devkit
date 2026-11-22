@@ -16,7 +16,7 @@ File tín hiệu chép từ transcript: lời người dùng, output của tool,
 1. Đọc file tín hiệu. Gom các tín hiệu cùng gốc thành một vấn đề. Bỏ vấn đề chỉ xảy ra một lần do lỗi gõ hoặc do mạng.
 2. Với mỗi vấn đề, nói quyết định sai trong một câu: agent đã kết luận gì, lẽ ra phải kết luận gì.
 3. Tìm đoạn text gây ra nó trong devkit: `rules/`, `skills/*/SKILL.md`, `agents/`, `herdr/templates/`, `hooks/`. Mở file, trích đúng dòng. Thường là một trong ba dạng: thiếu trường hợp; mô tả công cụ mà không nói nó phục vụ quyết định nào; cấm mà không nói làm gì thay.
-4. Viết bản sửa ở tầng sở hữu chủ đề, dạng "khi X, làm Y, vì Z". Text đã đúng mà agent vẫn trượt thì đề xuất hook hoặc script thay vì thêm chữ.
+4. Viết bản sửa ở tầng sở hữu chủ đề, dạng "khi X, làm Y, vì Z", theo `~/.claude/rules/writing-instructions.md` (chọn dạng sửa theo kiểu lỗi, không chép một ý vào hai file). Text đã đúng mà agent vẫn trượt thì đề xuất hook hoặc script thay vì thêm chữ.
 5. Đọc lại bản sửa với case lỗi và với case mà đoạn cũ được viết cho. Cả hai phải ra đúng.
 6. Xếp theo tác động: lặp lại nhiều nhất, tốn thời gian người dùng nhất lên đầu. Tối đa 3.
 

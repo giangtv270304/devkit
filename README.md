@@ -83,6 +83,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `skills/tdd`, `skills/debug`, `skills/perf` | test first; find the root cause before fixing; measure before optimizing |
 | `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
 | `skills/dependency-upgrade` | bump libraries in small batches, CVE fixes, one commit per batch |
+| `skills/visual-plan` | a private Artifact page per task: diagrams, API contract examples, states, decision tables and step-through examples, built with the plan |
 | `skills/address-review` | answer review comments on your own PR: check each, fix or push back, replies sent only after your ok |
 | `skills/fix-ci`, `skills/resolve-conflicts` | red CI checks: read the failed log, name the cause, reproduce and pass locally before push; merge conflicts: each side's intent, user approves how to resolve |
 | `skills/vet-third-party` | read every file of a third-party skill, plugin, hook or MCP before installing or copying it: injection, hidden commands, secret reads, config writes, data sent out, license |
@@ -92,7 +93,7 @@ Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pr
 | `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
 | **Shared** | |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer, improver |
-| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, drawing an Excalidraw picture with the plan (`diagrams`), fixing an instruction after a correction, writing skills/agents/rules (`writing-instructions`), checking the pinned version of a library API (`library-apis`), opening agents inside Herdr |
+| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, pictures while discussing and planning (`diagrams`), fixing an instruction after a correction, writing skills/agents/rules (`writing-instructions`), checking the pinned version of a library API (`library-apis`), opening agents inside Herdr |
 | `output-styles/` | `engineer-brief` and `plain-words` reply styles |
 | `templates/project.md`, `templates/adr.md` | starting points for a project's `.claude/project.md` and for an ADR when the project has no template |
 | `settings/user.fragment.json` | hooks, deny rules and enabled plugins that `install.py` merges into `~/.claude/settings.json` |

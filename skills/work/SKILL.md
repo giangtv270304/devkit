@@ -19,7 +19,7 @@ Không có file đó thì dùng mặc định: thư mục task là `work/` nếu
 Bên dưới, `<task>` nghĩa là `<thư mục task>/<slug>`.
 
 ## Một task = một file
-Mỗi task có đúng một file: `<task>/TASK.md`, chép từ `${CLAUDE_SKILL_DIR}/task-template.md`. Không tạo thêm file kế hoạch hay file ghi chú nào khác. Chỉ thêm `<task>/proof/` khi có ảnh chụp.
+Mỗi task có đúng một file: `<task>/TASK.md`, chép từ `${CLAUDE_SKILL_DIR}/task-template.md`. Không tạo thêm file kế hoạch hay file ghi chú nào khác. Chỉ thêm `<task>/proof/` khi có ảnh chụp, và `<task>/visual/` khi skill `visual-plan` dựng trang trực quan.
 
 `<task>/log.md` do hook ghi tự động: mỗi lần một session hoặc agent dừng là một dòng. Bạn không sửa file đó. Đọc 20 dòng cuối khi tiếp tục một task, để biết session khác đã làm gì.
 
@@ -73,7 +73,7 @@ Tìm gốc lỗi trước khi viết test. Nếu chưa biết gốc lỗi, test 
 
 ## 3. Kế hoạch
 
-Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn TASK.md; bug: tự viết kế hoạch từ "Nguyên nhân bug". Mỗi bước ghi repo, kết quả, tiêu chí, agent, file thân/lá. Chỉ ghi đường dẫn đã mở và đọc. Luôn có dòng "Cách tắt khi có lỗi". High-risk: thêm đoạn code đề xuất cho file thân. High-risk và cross-repo: giao `reviewer` rà kế hoạch trước khi dừng (trong Herdr là một pane `--template reviewer`, câu giao việc nói rà Kế hoạch trong TASK.md). Chi tiết: `reference/planning.md`. API mới, luồng mới hoặc đổi logic qua từ ba thành phần: vẽ sơ đồ Excalidraw và ghi mermaid vào Kế hoạch trước ĐIỂM DỪNG 1, theo ~/.claude/rules/diagrams.md.
+Feature, cross-repo, high-risk, spike: giao cho `architect` kèm đường dẫn TASK.md; bug: tự viết kế hoạch từ "Nguyên nhân bug". Mỗi bước ghi repo, kết quả, tiêu chí, agent, file thân/lá. Chỉ ghi đường dẫn đã mở và đọc. Luôn có dòng "Cách tắt khi có lỗi". High-risk: thêm đoạn code đề xuất cho file thân. High-risk và cross-repo: giao `reviewer` rà kế hoạch trước khi dừng (trong Herdr là một pane `--template reviewer`, câu giao việc nói rà Kế hoạch trong TASK.md). Chi tiết: `reference/planning.md`. API mới, luồng mới, đổi logic qua từ ba thành phần hoặc đổi dữ liệu: dựng trang trực quan theo skill `visual-plan` và ghi mermaid luồng chính vào Kế hoạch trước ĐIỂM DỪNG 1.
 
 **ĐIỂM DỪNG 1**: Phase `plan`. Tóm tắt ghi `CẦN BẠN: đọc Mục tiêu và Kế hoạch; sửa bằng > NOTE: hoặc nói đồng ý`. Đưa link TASK.md. Hỏi luôn agent có được commit trên máy hay không. Mặc định là không commit.
 

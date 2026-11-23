@@ -27,7 +27,7 @@ Mỗi dòng một con số hoặc "chưa biết, hỏi người dùng". Không �
 ## 3. Phương án
 Hai tới ba phương án thật sự khác nhau. Mỗi phương án: sơ đồ một hình, cách nó đáp ứng từng yêu cầu ở mục 2, cái giá phải trả, và cách lùi khi sai. Một phương án luôn là "làm ít nhất có thể trong hệ thống hiện tại".
 
-Sơ đồ viết bằng mermaid trong file markdown: `flowchart` cho thành phần, `sequenceDiagram` cho luồng. Mỗi sơ đồ tối đa khoảng 10 hộp. Khi bàn phương án với người dùng, vẽ thêm mỗi phương án một hình Excalidraw theo ~/.claude/rules/diagrams.md để so sánh trên chat; mermaid vẫn là bản lưu trong ADR.
+Sơ đồ viết bằng mermaid trong file markdown: `flowchart` cho thành phần, `sequenceDiagram` cho luồng. Mỗi sơ đồ tối đa khoảng 10 hộp. Khi bàn phương án với người dùng, dựng trang trực quan theo skill `visual-plan`, mỗi phương án một tab Tổng quan và Luồng để so sánh; mermaid vẫn là bản lưu trong ADR.
 
 ## 4. Quyết định
 - Đề xuất một phương án và một câu lý do. Hỏi người dùng khi các phương án đổi chi phí, người vận hành hay hợp đồng với bên ngoài.

@@ -17,17 +17,17 @@ Run the dry run first and read each row before `--apply`.
 ## New machine
 
 ```bash
-git clone https://github.com/giangtv270304/jigkit ~/devkit
+git clone https://github.com/giangtv270304/jigkit ~/jigkit
 ```
 
-Clone into `~/devkit`: the hooks, rules and `install.py` use that path and the `~/.claude/devkit` link, so the folder keeps its old name.
+Any folder works; `install.py` links `~/.claude/devkit` to it, and the hooks and rules reach the repo through that link.
 
 ```bash
-~/devkit/install.py
+~/jigkit/install.py
 ```
 
 ```bash
-~/devkit/install.py --apply
+~/jigkit/install.py --apply
 ```
 
 The first run is a dry run and prints one row per item. `--apply` links each skill, agent, rule and output style into `~/.claude/`, links `~/.claude/devkit` to this repo, and merges `settings/user.fragment.json` (hooks, deny rules and enabled plugins) into `~/.claude/settings.json` after writing a backup next to it. It never overwrites a file it did not create.
@@ -51,7 +51,7 @@ The plugin only calls `gopls`, so `gopls` must be on `PATH` (`go install golang.
 ## Once per clone
 
 ```bash
-git -C ~/devkit config core.hooksPath .githooks
+git -C ~/jigkit config core.hooksPath .githooks
 ```
 
 Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pre-commit hook blocks secrets, env files, IP addresses and every name on that list. The list itself stays off the repo.

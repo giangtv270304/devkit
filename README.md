@@ -144,7 +144,7 @@ Remove with `claude plugin uninstall gopls-lsp`. A value you set to `false` in `
 <details>
 <summary><b>Herdr (optional)</b></summary>
 
-`rules/herdr.md` and `skills/herdr-dispatch` act only inside the Herdr app; elsewhere they fall back to subagents.
+`rules/herdr.md` and `skills/herdr-dispatch` act only inside the Herdr app; elsewhere they fall back to subagents. Why and how: [herdr/README.md](herdr/README.md).
 
 - `herdr-dispatch` opens agents as panes: `helper` (one-off, read-only by default), `worker` (a plan step), `reviewer` (reviews by `agents/reviewer.md` or `security-reviewer.md`).
 - In one repo, each independent step gets its own worktree (`dispatch.py --worktree <branch>`). The lead merges in plan order and removes a worktree only after its branch is merged.

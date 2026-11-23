@@ -93,10 +93,12 @@ def collect_tasks(today):
             done = phase.strip().lower().startswith("done")
             if done and updated != today:
                 continue
+            prio, due, key = status.task_priority(d)
             path = next((p for p in (d / "TASK.md", d / "CONTEXT.md") if p.exists()), d)
             tasks.append({
                 "ws": ws.name, "slug": slug, "phase": phase, "updated": updated, "need": need,
                 "git": git, "done": done, "path": path, "summary": summary_lines(d / "TASK.md"),
+                "prio": prio, "due": due, "key": key,
             })
     return tasks
 
@@ -120,11 +122,13 @@ def render_tasks(tasks):
             continue
         out.append(f"### {title} ({len(items)})")
         items.sort(key=lambda t: t["updated"] or "", reverse=True)
+        items.sort(key=lambda t: t["key"])
         for t in items:
             box = "x" if t["done"] else " "
             link = f"[{t['path'].name if t['path'].is_file() else 'thư mục'}](<file://{t['path']}>)"
             upd = f" · {t['updated']}" if t["updated"] else ""
-            out.append(f"- [{box}] **{t['slug']}** · `{t['phase']}`{upd} · {link}")
+            due = f" · hạn {t['due']}" if t["due"] else ""
+            out.append(f"- [{box}] **{t['prio']}** · **{t['slug']}** · `{t['phase']}`{upd}{due} · {link}")
             for k in ("Đang làm", "Đã tới"):
                 if t["summary"].get(k):
                     out.append(f"    - {k}: {clean(t['summary'][k], 200)}")

@@ -1,125 +1,196 @@
+<div align="center">
+
 # Jigkit
 
-Personal Claude Code toolkit: skills, agents, rules, hooks and output styles that work in any project. Project-specific facts live in each project's `.claude/project.md`, never here.
+**A drop-in workflow kit for Claude Code: skills, agents, rules and guard hooks that work in any project.**
 
-## Using it yourself
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-skills_%26_hooks-d97757)](https://docs.claude.com/en/docs/claude-code)
+[![Python 3](https://img.shields.io/badge/python-3-3776ab?logo=python&logoColor=white)](install.py)
+[![Tests](https://img.shields.io/badge/tests-make_test-brightgreen)](tests)
 
-This is one person's setup, shared as is under the MIT license. Fork it, then edit before `install.py --apply`, because the rules apply to every project and session:
+[Quick start](#quick-start) · [How a task runs](#how-a-task-runs) · [What's inside](#whats-inside) · [Make it yours](#make-it-yours) · [Layout](#full-layout)
 
-- `rules/preferences.md`: the commit, push and merge policy names the owner's GitHub account. Put yours in, or the "push without asking" case never applies.
-- `output-styles/` and `rules/writing-vi.md`: replies are in Vietnamese. Change the language line in the style you use.
-- `hooks/obsidian_daily.py` (Stop hook) writes session notes into an Obsidian vault (`OBSIDIAN_VAULT`). Set `OBSIDIAN_DAILY=off` or drop the hook from `settings/user.fragment.json` if you do not use Obsidian.
-- `rules/herdr.md` and `skills/herdr-dispatch` only act inside the Herdr app; outside it they fall back to subagents.
-- Copy `denylist.example.txt` to `~/.config/devkit/denylist.txt` with the names your commits must never carry.
+</div>
 
-Run the dry run first and read each row before `--apply`.
+---
 
-## New machine
+## Why
+
+- **One task, one file.** `/work` keeps goal, plan, tests, review and hand-off in a single `TASK.md`, with two approval stops.
+- **Guardrails, not prompts.** Hooks block force pushes, `.env` reads, edits outside the plan and stopping while the build is red.
+- **Project-agnostic.** Nothing project-specific lives here; each project adds a short `.claude/project.md`.
+
+## Quick start
 
 ```bash
 git clone https://github.com/giangtv270304/jigkit ~/jigkit
 ```
 
-Any folder works; `install.py` links `~/.claude/devkit` to it, and the hooks and rules reach the repo through that link.
-
 ```bash
-~/jigkit/install.py
+~/jigkit/install.py           # dry run: one row per item, nothing written
 ```
 
 ```bash
-~/jigkit/install.py --apply
+~/jigkit/install.py --apply   # link into ~/.claude and merge settings
 ```
 
-The first run is a dry run and prints one row per item. `--apply` links each skill, agent, rule and output style into `~/.claude/`, links `~/.claude/devkit` to this repo, and merges `settings/user.fragment.json` (hooks, deny rules and enabled plugins) into `~/.claude/settings.json` after writing a backup next to it. It never overwrites a file it did not create.
+`--apply` links skills, agents, rules and output styles into `~/.claude/`, links `~/.claude/devkit` to the repo, and merges `settings/user.fragment.json` into `~/.claude/settings.json` (backup written first). It never overwrites a file it did not create.
 
-If agents do not show up after install, run `./install.py --apply --copy-agents` (copies instead of links; re-run after each pull).
+| Action | Command |
+|---|---|
+| Update | `git pull` (links apply next session; re-run `--apply` only if files were added or the settings fragment changed) |
+| Agents missing | `./install.py --apply --copy-agents` (copies instead of links; re-run after each pull) |
+| Uninstall | `./install.py --uninstall --apply` |
 
-Update: `git pull`. Links point into the repo, so changes apply to the next session. Re-run `install.py --apply` only when a file was added or `settings/user.fragment.json` changed.
+> [!IMPORTANT]
+> The rules apply to **every** project and session. Read [Make it yours](#make-it-yours) before `--apply`.
 
-Remove: `./install.py --uninstall --apply`.
+## How a task runs
 
-## Go language server
-
-`install.py --apply` enables the official `gopls-lsp` plugin (`enabledPlugins` in `settings/user.fragment.json`; a value you set to `false` is kept). It does not install it. Run once, version 1.0.0 from the `claude-plugins-official` marketplace:
-
-```sh
-claude plugin install gopls-lsp@claude-plugins-official
+```mermaid
+flowchart LR
+    G[Goal] --> P[Plan<br/>architect]
+    P -->|approval 1| T[Tests first<br/>tester]
+    T --> D[Build<br/>developer]
+    D --> V{Verify hooks<br/>build · vet · test}
+    V -->|red| D
+    V -->|green| R[Review<br/>reviewer · security]
+    R -->|approval 2| S[Ship<br/>commit · PR]
 ```
 
-The plugin only calls `gopls`, so `gopls` must be on `PATH` (`go install golang.org/x/tools/gopls@latest`, binary in `~/go/bin`). Remove it with `claude plugin uninstall gopls-lsp`.
+Every step writes to the same `TASK.md`. Agents report `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN` or `BLOCKED`; only the coordinator edits the file. Inside [Herdr](#herdr-optional) each step runs in a visible pane instead of a subagent.
 
-## Once per clone
+## What's inside
+
+### Commands you type
+
+| Skill | Does |
+|---|---|
+| `/work` | Runs one task end to end in `TASK.md` |
+| `/lead` | Coordinates a whole project from a Herdr tab, memory in `LEAD.md` |
+| `/design` | Options, non-functional needs, ADR with diagrams |
+| `/review-pr` | Reviews someone else's PR in its own worktree |
+| `/research` | Sourced answers at three depths |
+| `/brainstorm` | Vague idea → decision record |
+| `/retro` | Traces session friction to rule/skill text, fixes on a `retro/<date>` branch |
+
+### Loaded automatically when relevant
+
+| Group | Skills |
+|---|---|
+| Conventions | `go-service`, `sdk-wrapper`, `data-design`, `ops-change`, `frontend-change` |
+| Methods | `tdd`, `debug`, `perf`, `dependency-upgrade`, `cross-repo-change`, `refresh-context`, `visual-plan` |
+| PR upkeep | `address-review`, `fix-ci`, `resolve-conflicts` |
+| Safety | `vet-third-party` (audits a plugin, skill or MCP before install) |
+
+### Guard hooks
+
+| Hook | Stops |
+|---|---|
+| `bash-guard.sh` | force push, `reset --hard`, `clean -fd`, `branch -D`, unsafe `rm -rf`, real `.env` reads |
+| `plan_gate.py` | code agents editing files the plan does not list, or editing on `main` |
+| `verify_before_stop.py` | code agents stopping while `go build/vet/test` or Node `type-check`/`test` fail |
+| `comment-guard.sh` | new code comments that break `rules/comments.md` |
+| `herdr_agent_gate.py` | hidden subagents inside Herdr (work runs in visible panes) |
+| `.githooks/`, `git-local/` | secrets, IPs, denylisted names, AI files and bad commit messages reaching git |
+
+Also: 6 agents (`architect`, `tester`, `developer`, `reviewer`, `security-reviewer`, `improver`), 12 rules and 2 output styles (`engineer-brief`, `plain-words`).
+
+## Make it yours
+
+This is one person's setup, shared as is. Fork it and change these before `--apply`:
+
+| File | Change |
+|---|---|
+| `rules/preferences.md` | GitHub account in the commit/push policy, or "push without asking" never applies |
+| `output-styles/`, `rules/writing-vi.md` | Reply language (default Vietnamese) |
+| `hooks/obsidian_daily.py` | Writes session notes to `OBSIDIAN_VAULT`. Set `OBSIDIAN_DAILY=off` or drop it from `settings/user.fragment.json` |
+| `denylist.example.txt` | Copy to `~/.config/devkit/denylist.txt` with names your commits must never carry |
+
+Once per clone, enable this repo's own git hooks:
 
 ```bash
 git -C ~/jigkit config core.hooksPath .githooks
 ```
 
-Then create `~/.config/devkit/denylist.txt` (see `denylist.example.txt`). The pre-commit hook blocks secrets, env files, IP addresses and every name on that list. The list itself stays off the repo.
+### Per project
 
-## Per project
+```bash
+cp ~/jigkit/templates/project.md <project>/.claude/project.md   # fill in what differs
+```
 
-- Copy `templates/project.md` to `<project>/.claude/project.md` and fill in what differs from the defaults.
-- Keep AI files out of the project's git and block pushes that carry them: `git-local/install.sh <repo or folder of repos>`. It copies the hooks, so run it again after you change a hook in `git-local/`.
+```bash
+~/jigkit/git-local/install.sh <repo or folder of repos>          # keep AI files out of git
+```
 
-## Layout
+`git-local/install.sh` copies the hooks, so re-run it after changing them.
+
+<details>
+<summary><b>Go language server (optional)</b></summary>
+
+`--apply` enables the official `gopls-lsp` plugin but does not install it:
+
+```sh
+claude plugin install gopls-lsp@claude-plugins-official
+go install golang.org/x/tools/gopls@latest   # gopls must be on PATH
+```
+
+Remove with `claude plugin uninstall gopls-lsp`. A value you set to `false` in `enabledPlugins` is kept.
+
+</details>
+
+<a name="herdr-optional"></a>
+<details>
+<summary><b>Herdr (optional)</b></summary>
+
+`rules/herdr.md` and `skills/herdr-dispatch` act only inside the Herdr app; elsewhere they fall back to subagents.
+
+- `herdr-dispatch` opens agents as panes: `helper` (one-off, read-only by default), `worker` (a plan step), `reviewer` (reviews by `agents/reviewer.md` or `security-reviewer.md`).
+- In one repo, each independent step gets its own worktree (`dispatch.py --worktree <branch>`). The lead merges in plan order and removes a worktree only after its branch is merged.
+- A repo another task is using (off its default branch, dirty, or with an agent in it) always gets a worktree.
+- Worktrees go to `worktrees.directory` in `~/.config/herdr-app/settings.json` (default `~/.herdr/worktrees`). Claude asks to trust each new worktree, so the agent shows Blocked until you answer.
+- `bin/herdr-task <slug> [first message] [--root DIR]` opens a Herdr space with a lead `claude`.
+
+</details>
+
+<a name="full-layout"></a>
+<details>
+<summary><b>Full layout</b></summary>
 
 | Path | What |
 |---|---|
-| **Entry points** (you type them) | |
-| `skills/work` | one `TASK.md` per task: goal, plan, build, verify, review, ship; two approval stops |
-| `skills/lead` | `/lead` in a Herdr tab: the session coordinates a project; each plain request is answered, done in place, or delegated through `herdr-dispatch`, with `LEAD.md` as its memory |
-| `skills/design` | `/design`: context, non-functional needs, options, an ADR with diagrams |
-| `skills/review-pr` | review someone else's PR in a separate worktree |
-| `skills/research` | sourced answers at three depths, any domain |
-| `skills/brainstorm` | from a vague idea to a decision record |
-| `skills/retro` | `/retro`: collects friction signals from transcripts and TASK.md, the `improver` agent traces them to rule, skill, agent or hook text, fixes land on a pushed `retro/<date>` branch of devkit and merge only on the user's "ok" |
-| **Conventions** (loaded before writing code) | |
-| `skills/go-service` | Go service conventions with a reference service |
-| `skills/sdk-wrapper` | an SDK that wraps an HTTP API, with a reference SDK in Go and TypeScript |
-| `skills/data-design` | data model, keys, indexes, expand/contract migrations, backfills, ledgers |
-| `skills/ops-change` | Dockerfile, CI/CD, deploy config, secrets, monitoring, rollback, runbooks |
-| `skills/frontend-change` | web and mobile screens: states, API contract, verification in a browser or simulator |
-| **Methods** | |
-| `skills/tdd`, `skills/debug`, `skills/perf` | test first; find the root cause before fixing; measure before optimizing |
-| `skills/cross-repo-change`, `skills/refresh-context` | multi-repo changes; keeping CLAUDE.md and notes current |
-| `skills/dependency-upgrade` | bump libraries in small batches, CVE fixes, one commit per batch |
-| `skills/visual-plan` | a private Artifact page per task: diagrams, API contract examples, states, decision tables and step-through examples, built with the plan |
-| `skills/address-review` | answer review comments on your own PR: check each, fix or push back, replies sent only after your ok |
-| `skills/fix-ci`, `skills/resolve-conflicts` | red CI checks: read the failed log, name the cause, reproduce and pass locally before push; merge conflicts: each side's intent, user approves how to resolve |
-| `skills/vet-third-party` | read every file of a third-party skill, plugin, hook or MCP before installing or copying it: injection, hidden commands, secret reads, config writes, data sent out, license |
-| **Herdr** (see the Herdr section) | |
-| `skills/herdr-dispatch` | open an agent as a pane or tab: a one-off with `helper`, or plan steps with `worker` (one agent per repo, or one git worktree per step) |
-| `herdr/templates` | `worker.md` (a plan step), `reviewer.md` (reviews the diff itself by the rules in `agents/reviewer.md` or `agents/security-reviewer.md`), `helper.md` (a one-off, read-only by default): rules copied into an agent's first message; linked to `~/.config/herdr-core/templates/` |
-| `bin/herdr-task` | `herdr-task <slug> [first message] [--root DIR]`: open a Herdr space with a lead `claude`; linked to `~/.local/bin/` |
-| **Shared** | |
+| `skills/` | 24 skills, one folder each with `SKILL.md` |
 | `agents/` | architect, tester, developer, reviewer, security-reviewer, improver |
-| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, pictures while discussing and planning (`diagrams`), fixing an instruction after a correction, writing skills/agents/rules (`writing-instructions`), checking the pinned version of a library API (`library-apis`), opening agents inside Herdr |
-| `output-styles/` | `engineer-brief` and `plain-words` reply styles |
-| `templates/project.md`, `templates/adr.md` | starting points for a project's `.claude/project.md` and for an ADR when the project has no template |
-| `settings/user.fragment.json` | hooks, deny rules and enabled plugins that `install.py` merges into `~/.claude/settings.json` |
-| `denylist.example.txt` | format of `~/.config/devkit/denylist.txt`, read by the pre-commit hook |
-| `.githooks/` | this repo's own `pre-commit` (secrets, IPs, denylist) and `commit-msg`; enable with `core.hooksPath` |
-| `hooks/task_log.py` | on Stop and SubagentStop, appends one line to `log.md` next to the active `TASK.md` |
-| `hooks/bash-guard.sh` | blocks force push (`-f`, `+refspec`), `reset --hard`, `clean -fd`, wide `checkout`/`restore`, `branch -D`, `stash clear`, unsafe `rm -rf`, and reads of real `.env` files |
-| `hooks/plan_gate.py` | asks before developer, tester or a Herdr worker (`DEVKIT_ROLE=worker`) edits a file the plan does not list, by Edit/Write or by a Bash write (`>`, `tee`, `sed -i`); generated files and tests pass; denies their edits while the repo is on `main`/`master` |
-| `hooks/herdr_agent_gate.py` | inside Herdr, denies developer, tester, reviewer and security-reviewer subagents so the work runs in a visible pane, reviewer panes included |
-| `hooks/verify_before_stop.py` | on Stop and SubagentStop, blocks a code role (`DEVKIT_ROLE` worker/developer, subagent developer/tester) while `go build/vet/test` or the Node `type-check`/`test` scripts of the changed code fail (a tester gets build/vet/type-check only; a `NEEDS_REPLAN` or `BLOCKED` report passes); `DEVKIT_VERIFY=0` turns it off, `DEVKIT_VERIFY_TIMEOUT` (default 240s) caps the run |
-| `hooks/format-edited-file.sh` | formats the file just edited |
-| `hooks/lib/` | `skip-generated.sh`: the generated-file list that both edit hooks share |
-| `hooks/task_resume.py` | after a compaction, tells the session which `TASK.md` it was on and shows the last `log.md` lines |
-| `hooks/comment-guard.sh` | after an edit to Go, TS/JS or SQL, sends new comment lines back to Claude to delete unless they pass `rules/comments.md`; Go doc comments on exported declarations and `/** */` JSDoc on exports pass |
-| `hooks/obsidian_daily.py` | on Stop, writes today's tasks and the day's prompts (secrets redacted) to the Obsidian daily note in `OBSIDIAN_VAULT`; if the vault syncs to a cloud, those prompts leave the machine. Turn off with `obsidian_daily.py --off` |
-| `git-local/` | hide AI files from git, block pushing them or secrets (`gitleaks`, when installed), and reject commit messages that break `rules/commits.md`, in any repo |
-| `tests/`, `Makefile` | `make test` runs the unit tests; `make lint` runs `bash -n`, `py_compile` and `shellcheck`/`ruff` when installed |
+| `rules/` | comments, commits, Go, pull requests, review levels, writing style, preferences, diagrams, instructions, writing-instructions, library-apis, herdr |
+| `output-styles/` | `engineer-brief`, `plain-words` |
+| `hooks/` | Claude Code hooks; `task_log.py` and `task_resume.py` keep `TASK.md` context across stops and compactions; `format-edited-file.sh` formats edited files; `lib/` holds the shared generated-file list |
+| `herdr/templates/` | `worker.md`, `reviewer.md`, `helper.md`, linked to `~/.config/herdr-core/templates/` |
+| `bin/herdr-task` | Herdr space launcher, linked to `~/.local/bin/` |
+| `templates/` | `project.md` and `adr.md` starting points |
+| `settings/user.fragment.json` | hooks, deny rules and plugins merged into `~/.claude/settings.json` |
+| `git-local/` | per-repo hooks: hide AI files, block pushing them or secrets (`gitleaks` if installed), check commit messages |
+| `.githooks/` | this repo's `pre-commit` and `commit-msg` |
+| `tests/`, `Makefile` | unit tests and lint |
 
-## Herdr
+</details>
 
-In a single repo, `herdr-dispatch` gives each independent step its own worktree (`dispatch.py --worktree <branch>`); the lead merges the branches in plan order and removes a worktree only after its branch is merged. Worktrees go to `worktrees.directory` in `~/.config/herdr-app/settings.json` (default `~/.herdr/worktrees`). Claude asks to trust the folder the first time it runs in a new worktree, so that agent shows Blocked until you answer.
+## Development
 
-Claude desktop and Herdr run the same flow. `/work` uses subagents outside Herdr and `herdr-dispatch` panes inside it (worker for code, reviewer for review; only architect and search stay subagents); either way a step is test first, edits outside the plan go through `plan_gate`, the agent reports `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_REPLAN` or `BLOCKED`, and only the coordinator writes `TASK.md`. A Herdr reviewer pane reviews by reading `agents/reviewer.md` (or `security-reviewer.md` in a separate pane), so review rules live only in `agents/`. A repo that another task is already using (not on its default branch, uncommitted changes, or an agent in it) always gets a worktree.
+```bash
+make test   # unit tests
+```
 
-## Rules for this repo
+```bash
+make lint   # bash -n, py_compile, shellcheck and ruff when installed
+```
 
-- No company, client, repo, service or vendor names. No secrets. No real `.env`.
-- Third-party code is not vendored here, except MIT/Apache text copied with its source and license noted. Official plugins are enabled through `settings/user.fragment.json`, not copied.
-- File names are lowercase with hyphens, except `SKILL.md`, `README.md` and the `TASK.md` files skills create.
+Repo rules:
+
+- No company, client, repo, service or vendor names. No secrets, no real `.env`.
+- No vendored third-party code, except MIT/Apache text copied with source and license noted. Official plugins are enabled via `settings/user.fragment.json`.
+- Lowercase, hyphenated file names, except `SKILL.md`, `README.md` and generated `TASK.md`.
+
+## License
+
+[MIT](LICENSE)

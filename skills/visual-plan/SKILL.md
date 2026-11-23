@@ -33,7 +33,7 @@ Xong khi: mỗi tiêu chí nghiệm thu xuất hiện ở ít nhất một tab, 
 
 ## 3. Dựng trang
 1. Gọi Artifact `quickstart` với intent `other`, rồi làm theo trang hướng dẫn nó trả về (skill `artifact-design`).
-2. Viết `<task>/visual/index.html`. Mermaid tải từ `https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js`. Dữ liệu ví dụ để thẳng trong trang. Chữ trên trang viết tiếng Việt theo ~/.claude/rules/writing-vi.md; tên trong code giữ nguyên.
+2. Viết `<task>/visual/index.html`. Mỗi tab là một `<section id=...>` xếp dọc, thanh tab là các link `#id` dính trên đầu; không ẩn section, vì mermaid vẽ trong phần tử ẩn ra kích thước 0. Sơ đồ đặt trong `<pre class="mermaid">`: Artifact tự vẽ, không tải thư viện. Màu trong `classDef` của mermaid là màu cố định, nên chọn màu nền nhạt có chữ tối để đọc được ở cả hai theme. Dữ liệu ví dụ để thẳng trong trang. Chữ trên trang viết tiếng Việt theo ~/.claude/rules/writing-vi.md; tên trong code giữ nguyên.
 3. Publish với `icon: "diagram"`, `description` một câu nói task. Trang để riêng tư; chỉ gửi link cho người ngoài khi người dùng bảo, vì trang có tên thật của hệ thống.
 4. Ghi link vào TASK.md dưới `## Kế hoạch`: `Trang trực quan: <url>`. Mermaid của luồng chính vẫn nằm trong Kế hoạch (diagrams.md mục 3), vì reviewer và session sau đọc file chứ không mở trang.
 
@@ -47,4 +47,4 @@ Xong khi: trang mở được, mọi sơ đồ vẽ ra không lỗi cú pháp, l
 
 ## Khi không có tool Artifact
 - Architect subagent và Herdr worker không dựng trang. Session đang nói chuyện với người dùng (hoặc lead trong Herdr) dựng sau khi nhận plan.
-- Session không có tool Artifact: vẫn viết `<task>/visual/index.html` theo mục 3 rồi mở bằng `open <task>/visual/index.html`. Nói một dòng rằng trang chỉ có trên máy này.
+- Session không có tool Artifact: vẫn viết `<task>/visual/index.html` theo mục 3, thêm `<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script><script>mermaid.initialize({startOnLoad:true})</script>` vì trình duyệt thường không tự vẽ mermaid, rồi mở bằng `open <task>/visual/index.html`. Nói một dòng rằng trang chỉ có trên máy này.

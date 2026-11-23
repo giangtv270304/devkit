@@ -8,4 +8,4 @@ __pycache__/
 denylist.txt
 ledger/
 .claude/
-work/
+/work/

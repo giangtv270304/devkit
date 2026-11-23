@@ -31,6 +31,7 @@ Hợp đồng thay đổi: không | <API, event, khóa Redis, migration, biến 
 ## Kế hoạch
 <!-- Checklist. Đánh dấu [x] khi xong. Dài hơn một màn hình nghĩa là task quá to: tách ra. -->
 <!-- Mỗi bước nói kết quả cần đạt và tiêu chí nó làm xong. Đường dẫn chính xác chỉ ghi cho file đã đọc code. -->
+<!-- API mới, luồng mới, đổi logic qua từ 3 thành phần: sơ đồ mermaid ở đây + checkpointId Excalidraw (~/.claude/rules/diagrams.md). -->
 - [ ] 1. <repo>: <kết quả cần đạt> (tiêu chí 1, 2) — tester -> developer
   - thân: `path/to/file.go` (<vì sao>)
   - lá: `path/to/other.go`

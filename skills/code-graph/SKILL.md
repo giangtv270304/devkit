@@ -33,7 +33,7 @@ Cùng hai biến môi trường như trên:
 - `graphify path "<A>" "<B>"`: đường ngắn nhất, ví dụ từ handler tới bảng.
 - `graphify query "<câu hỏi>"`: hỏi tự do.
 
-Exit code 3 là tên mơ hồ: chọn một tên trong danh sách nó trả về rồi hỏi lại. Exit code 4 là không có node đó: kiểm tra lại tên bằng grep.
+Ưu tiên `explain` và `path` trên tên file hay symbol: `query` tự do chỉ khớp theo từ khóa và hay trả về node không liên quan. Exit code 3 là tên mơ hồ: hỏi lại bằng `<đường dẫn>::<symbol>` hoặc id node trong danh sách nó trả về. Exit code 4 là không có node đó: kiểm tra lại tên bằng grep.
 
 ## 3. Dùng kết quả
 - Lập Kế hoạch: với mỗi file thân, chạy `explain` để thấy ai gọi nó, rồi mở các file đó trước khi ghi vào bước. Đưa cho architect đường dẫn `GRAPH_REPORT.md` và đoạn kết quả `explain`/`path` cần thiết, vì architect không chạy được lệnh.
@@ -44,10 +44,12 @@ Exit code 3 là tên mơ hồ: chọn một tên trong danh sách nó trả về
 `--code-only` bỏ qua docs, nên một repo chủ yếu là markdown (skill, tài liệu) cho ra graph thưa. Đọc được markdown thì phải có lượt LLM, và nội dung file sẽ rời máy. Chỉ làm khi repo là public hoặc người dùng đồng ý trong phiên này, rồi dùng gói Claude của chính người dùng:
 
 ```bash
-OBSIDIAN_DAILY=off DEVKIT_VERIFY=0 GRAPHIFY_CLAUDE_CLI_MODEL=sonnet GRAPHIFY_OUT="$HOME/.cache/jigkit-graphs/<repo>" uvx --from 'graphifyy[mcp]==0.9.118' graphify extract <đường dẫn repo> --backend claude-cli
+OBSIDIAN_DAILY=off DEVKIT_VERIFY=0 GRAPHIFY_CLAUDE_CLI_MODEL=sonnet GRAPHIFY_OUT="$HOME/.cache/jigkit-graphs/<repo>" uvx --from 'graphifyy[mcp]==0.9.118' graphify extract <đường dẫn repo> --backend claude-cli --token-budget 20000
 ```
 
-Backend này gọi `claude -p` cho từng nhóm file. Mỗi lần gọi chạy cả hook của người dùng, nên `OBSIDIAN_DAILY=off` để prompt của graphify không bị ghi vào note Obsidian, và `DEVKIT_VERIFY=0` để hook kiểm tra không chạy build ở mỗi lần dừng. Tốn lượt dùng của gói: nói trước số file docs mà lệnh `--code-only` đã báo bị bỏ qua.
+Rồi chạy `cluster-only <đường dẫn repo> --backend claude-cli` với cùng các biến để các cụm có tên thật thay vì `Community N`. `--token-budget 20000` là bắt buộc: với mặc định, graphify gửi cả trăm file trong vài lượt to và model bỏ sót phần lớn (thử trên jigkit: 58/66 file docs không ra node; với 20000 thì 65/66 có node). Còn báo `produced no nodes` thì chạy lại lệnh, chỉ các file thiếu được gửi lại.
+
+Backend này gọi `claude -p` cho từng nhóm file. Mỗi lần gọi chạy cả hook của người dùng, nên `OBSIDIAN_DAILY=off` để prompt của graphify không bị ghi vào note Obsidian, và `DEVKIT_VERIFY=0` để hook kiểm tra không chạy build ở mỗi lần dừng. Tốn lượt dùng của gói (jigkit, 66 file docs: khoảng 420k token vào, 4 phút): nói trước số file docs mà lệnh `--code-only` đã báo bị bỏ qua. Lượt này thêm node cho từng tài liệu và tên cụm dễ đọc, nhưng liên kết giữa tài liệu và code vẫn thưa, nên `path` từ một file markdown sang code thường không ra.
 
 ## Không làm
 - Không chạy `graphify install`, `graphify claude install` hay `graphify hook install`: chúng ghi hook PreToolUse chạy trước mọi lần đọc file và ghi vào `CLAUDE.md`, chồng lên hook của jigkit và để lại file AI trong repo.

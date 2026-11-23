@@ -80,7 +80,7 @@ Every step writes to the same `TASK.md`. Agents report `DONE`, `DONE_WITH_CONCER
 | Group | Skills |
 |---|---|
 | Conventions | `go-service`, `sdk-wrapper`, `data-design`, `ops-change`, `frontend-change` |
-| Methods | `tdd`, `debug`, `perf`, `dependency-upgrade`, `cross-repo-change`, `refresh-context`, `visual-plan` |
+| Methods | `tdd`, `debug`, `perf`, `dependency-upgrade`, `cross-repo-change`, `refresh-context`, `visual-plan`, `code-graph` |
 | PR upkeep | `address-review`, `fix-ci`, `resolve-conflicts` |
 | Safety | `vet-third-party` (audits a plugin, skill or MCP before install) |
 

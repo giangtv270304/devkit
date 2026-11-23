@@ -13,7 +13,7 @@ Một sơ đồ cho thấy các phần nối với nhau, nhưng không cho thấ
 - Đang bàn ý tưởng, chưa có plan: phác nhanh bằng Excalidraw theo ~/.claude/rules/diagrams.md. Dựng trang này khi đã có Mục tiêu và bản Kế hoạch đầu tiên.
 
 ## 1. Gom nội dung
-Đọc Mục tiêu, tiêu chí nghiệm thu và Kế hoạch trong TASK.md (hoặc ADR nháp của /design), cùng code đã đọc khi lập plan. Mọi tên service, endpoint, bảng, trường trên trang phải lấy từ file đã mở. Chỗ chưa biết ghi "chưa biết" kèm câu hỏi, không đoán.
+Đọc Mục tiêu, tiêu chí nghiệm thu và Kế hoạch trong TASK.md (hoặc ADR nháp của /design), cùng code đã đọc khi lập plan. Mọi tên service, endpoint, bảng, trường trên trang phải lấy từ file đã mở. Chỗ chưa biết ghi "chưa biết" kèm câu hỏi, không đoán. Có graph của skill `code-graph` thì lấy các cạnh của sơ đồ thành phần từ `graphify explain`.
 
 Xong khi: có danh sách tiêu chí, các thành phần bị đụng, và ít nhất ba ví dụ đầu vào (một bình thường, một biên, một lỗi).
 

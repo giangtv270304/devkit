@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-skills_%26_hooks-d97757)](https://docs.claude.com/en/docs/claude-code)
 [![Python 3](https://img.shields.io/badge/python-3-3776ab?logo=python&logoColor=white)](install.py)
-[![Tests](https://img.shields.io/badge/tests-make_test-brightgreen)](tests)
+[![CI](https://github.com/giangtv270304/jigkit/actions/workflows/ci.yml/badge.svg)](https://github.com/giangtv270304/jigkit/actions/workflows/ci.yml)
 
 [Quick start](#quick-start) · [How a task runs](#how-a-task-runs) · [What's inside](#whats-inside) · [Make it yours](#make-it-yours) · [Layout](#full-layout)
 

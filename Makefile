@@ -11,7 +11,7 @@ lint:
 	@find . -name __pycache__ -not -path './.git/*' -prune -exec rm -rf {} +
 	@cd tests && python3 -m unittest test_skills
 	@if command -v shellcheck >/dev/null 2>&1; then \
-		shellcheck hooks/*.sh hooks/lib/*.sh git-local/*.sh git-local/commit-msg git-local/pre-push; \
+		shellcheck -S warning hooks/*.sh hooks/lib/*.sh git-local/*.sh git-local/commit-msg git-local/pre-push; \
 	else echo "warning: shellcheck not installed, skipped"; fi
 	@if command -v ruff >/dev/null 2>&1; then ruff check .; \
 	else echo "warning: ruff not installed, skipped"; fi

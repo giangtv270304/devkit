@@ -9,7 +9,7 @@ zero=0000000000000000000000000000000000000000
 remote="$1"
 problems=""
 
-while read -r local_ref local_sha remote_ref remote_sha; do
+while read -r _local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$zero" ] && continue
   if [ "$remote_sha" = "$zero" ]; then
     range=("$local_sha" --not --remotes="$remote")

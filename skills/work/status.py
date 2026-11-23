@@ -89,12 +89,12 @@ def task_row(d):
         secs = sections(text)
         head = secs[""]
         try:
-            i = next(n for n, l in enumerate(head) if l.startswith("Branch:"))
+            i = next(n for n, line in enumerate(head) if line.startswith("Branch:"))
             blines = []
-            for l in head[i + 1 :]:
-                if not BRANCH_LINE.match(l):
+            for line in head[i + 1 :]:
+                if not BRANCH_LINE.match(line):
                     break
-                blines.append(l)
+                blines.append(line)
         except StopIteration:
             blines = []
         need = field("\n".join(secs.get("tóm tắt", [])), "CẦN BẠN") or "?"

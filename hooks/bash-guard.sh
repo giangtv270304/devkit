@@ -71,6 +71,7 @@ flush_seg
 rm_target_ok() {
   local p="$1" rel part idx last tmpd
   local -a parts
+  # shellcheck disable=SC2088
   case "$p" in
     / | '~' | '~/' | '$HOME' | '${HOME}' | '$HOME/' | '${HOME}/' | .. | . | ./) return 1 ;;
     ../* | */.. | */../*) return 1 ;;

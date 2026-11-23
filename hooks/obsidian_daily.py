@@ -229,7 +229,7 @@ def open_items(note):
     m = re.search(r"^## Việc riêng\s*$(.*?)(?=^## |\Z)", text, re.S | re.M)
     if not m:
         return []
-    return [l for l in m.group(1).splitlines() if re.match(r"^\s*- \[ \] ", l)]
+    return [line for line in m.group(1).splitlines() if re.match(r"^\s*- \[ \] ", line)]
 
 
 def previous_note(folder, day):

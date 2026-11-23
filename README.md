@@ -1,4 +1,4 @@
-# devkit
+# Jigkit
 
 Personal Claude Code toolkit: skills, agents, rules, hooks and output styles that work in any project. Project-specific facts live in each project's `.claude/project.md`, never here.
 
@@ -17,8 +17,10 @@ Run the dry run first and read each row before `--apply`.
 ## New machine
 
 ```bash
-git clone <this repo> ~/devkit
+git clone https://github.com/giangtv270304/jigkit ~/devkit
 ```
+
+Clone into `~/devkit`: the hooks, rules and `install.py` use that path and the `~/.claude/devkit` link, so the folder keeps its old name.
 
 ```bash
 ~/devkit/install.py

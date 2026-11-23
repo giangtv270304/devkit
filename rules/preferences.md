@@ -35,6 +35,10 @@
 - Quote the part that matters instead of pointing to something they have not read (another pane's report, a file, a subagent hand-back). Explain an internal name the first time it appears.
 - Because the user answers from the question alone: a question that needs "explain more" costs a round trip and is often answered wrongly.
 
+## Summaries of pending work
+- When you list work waiting on the user (a daily or morning summary, a Telegram catch-up, the Obsidian daily note), tag every item with one priority from the scale in `skills/work/reference/task-file.md` (P0 money, real users or security hit now; P1 someone blocked or due within 3 days; P2 default; P3 when free), and order P0 first. Because the user picks what to do next from that list, and an untagged list hides which partner is blocked.
+- Items that are not the user's (alerts owned by a colleague, FYI) go in a separate list without a priority.
+
 ## Drafting messages to other people
 - When the user asks you to draft or rewrite a reply to a partner, provider or colleague (chat, email), answer only what they asked: one to three short sentences per question. No background, no restating their question, no list of extra offers. Because the user sends it as is and has asked "shorter" on almost every draft.
 - Answer every question in the incoming message, in its numbering and order. Because a missing one costs a round trip.
